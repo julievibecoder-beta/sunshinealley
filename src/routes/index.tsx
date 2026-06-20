@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shield, Users, MessageCircle, ArrowRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
-import { products } from "@/data/products";
-import { craftsmen } from "@/data/craftsmen";
+import { useProducts, useCraftsmen } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +25,8 @@ const categoryTiles = [
 ] as const;
 
 function Home() {
+  const products = useProducts();
+  const craftsmen = useCraftsmen();
   const featured = products.filter((p) => p.featured).slice(0, 8);
   const teaserArtisans = craftsmen.slice(0, 3);
 
