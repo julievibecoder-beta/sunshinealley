@@ -4,7 +4,8 @@ import { X } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ArtisanCard } from "@/components/site/ArtisanCard";
 import { PageHero } from "@/components/site/PageHero";
-import { craftsmen, type Craftsman } from "@/data/craftsmen";
+import { type Craftsman } from "@/data/craftsmen";
+import { useCraftsmen } from "@/lib/store";
 
 export const Route = createFileRoute("/craftsmen")({
   head: () => ({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/craftsmen")({
 });
 
 function Craftsmen() {
+  const craftsmen = useCraftsmen();
   const [open, setOpen] = useState<Craftsman | null>(null);
 
   return (

@@ -39,7 +39,7 @@ function Shop() {
       if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
       return true;
     });
-  }, [filter, query]);
+  }, [filter, query, products]);
 
   const filters: Filter[] = ["All", ...categories];
 
