@@ -4,7 +4,8 @@ import { Search } from "lucide-react";
 import { z } from "zod";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
-import { products, categories, type Category } from "@/data/products";
+import { categories, type Category } from "@/data/products";
+import { useProducts } from "@/lib/store";
 
 const searchSchema = z.object({
   category: z.enum(["Accessories", "Carpets", "Boxes", "Wearables"]).optional(),
@@ -30,6 +31,7 @@ function Shop() {
   const initial: Filter = (search.category as Filter) ?? "All";
   const [filter, setFilter] = useState<Filter>(initial);
   const [query, setQuery] = useState("");
+  const products = useProducts();
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -37,7 +39,7 @@ function Shop() {
       if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
       return true;
     });
-  }, [filter, query]);
+  }, [filter, query, products]);
 
   const filters: Filter[] = ["All", ...categories];
 
