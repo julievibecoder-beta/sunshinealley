@@ -18,7 +18,9 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminCraftsmenRouteImport } from './routes/admin.craftsmen'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
@@ -65,9 +67,19 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ShopRoute,
 } as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCraftsmenRoute = AdminCraftsmenRouteImport.update({
+  id: '/craftsmen',
+  path: '/craftsmen',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -79,7 +91,9 @@ export interface FileRoutesByFullPath {
   '/craftsmen': typeof CraftsmenRoute
   '/heritage': typeof HeritageRoute
   '/shop': typeof ShopRouteWithChildren
+  '/admin/craftsmen': typeof AdminCraftsmenRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -90,7 +104,9 @@ export interface FileRoutesByTo {
   '/craftsmen': typeof CraftsmenRoute
   '/heritage': typeof HeritageRoute
   '/shop': typeof ShopRouteWithChildren
+  '/admin/craftsmen': typeof AdminCraftsmenRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -103,7 +119,9 @@ export interface FileRoutesById {
   '/craftsmen': typeof CraftsmenRoute
   '/heritage': typeof HeritageRoute
   '/shop': typeof ShopRouteWithChildren
+  '/admin/craftsmen': typeof AdminCraftsmenRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -117,7 +135,9 @@ export interface FileRouteTypes {
     | '/craftsmen'
     | '/heritage'
     | '/shop'
+    | '/admin/craftsmen'
     | '/admin/login'
+    | '/admin/products'
     | '/shop/$slug'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -128,7 +148,9 @@ export interface FileRouteTypes {
     | '/craftsmen'
     | '/heritage'
     | '/shop'
+    | '/admin/craftsmen'
     | '/admin/login'
+    | '/admin/products'
     | '/shop/$slug'
     | '/admin'
   id:
@@ -140,7 +162,9 @@ export interface FileRouteTypes {
     | '/craftsmen'
     | '/heritage'
     | '/shop'
+    | '/admin/craftsmen'
     | '/admin/login'
+    | '/admin/products'
     | '/shop/$slug'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -220,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
@@ -227,16 +258,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/craftsmen': {
+      id: '/admin/craftsmen'
+      path: '/craftsmen'
+      fullPath: '/admin/craftsmen'
+      preLoaderRoute: typeof AdminCraftsmenRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminCraftsmenRoute: typeof AdminCraftsmenRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminProductsRoute: typeof AdminProductsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCraftsmenRoute: AdminCraftsmenRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminProductsRoute: AdminProductsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
