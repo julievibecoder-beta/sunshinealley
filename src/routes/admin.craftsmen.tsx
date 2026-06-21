@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus, Pencil, Trash2, X, ArrowUpDown } from "lucide-react";
 import { useCraftsmen, saveCraftsmen, type Craftsman } from "@/lib/store";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/admin/craftsmen")({
   component: AdminCraftsmen,
 });
 
 type Draft = Craftsman;
+type SortKey = "newest" | "name-asc" | "name-desc" | "specialty";
 
 const emptyDraft = (): Draft => ({
   id: "",
@@ -23,6 +25,34 @@ const emptyDraft = (): Draft => ({
 function AdminCraftsmen() {
   const craftsmen = useCraftsmen();
   const [editing, setEditing] = useState<Draft | null>(null);
+  const [search, setSearch] = useState("");
+  const [specialty, setSpecialty] = useState("all");
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
+
+  const specialties = useMemo(
+    () => Array.from(new Set(craftsmen.map((c) => c.specialty).filter(Boolean))).sort(),
+    [craftsmen],
+  );
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    const list = craftsmen.filter((c) => {
+      if (specialty !== "all" && c.specialty !== specialty) return false;
+      if (!q) return true;
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.specialty.toLowerCase().includes(q) ||
+        c.location.toLowerCase().includes(q)
+      );
+    });
+    const cmp: Record<SortKey, (a: Craftsman, b: Craftsman) => number> = {
+      newest: (a, b) => Number(b.id) - Number(a.id),
+      "name-asc": (a, b) => a.name.localeCompare(b.name),
+      "name-desc": (a, b) => b.name.localeCompare(a.name),
+      specialty: (a, b) => a.specialty.localeCompare(b.specialty) || a.name.localeCompare(b.name),
+    };
+    return [...list].sort(cmp[sortKey]);
+  }, [craftsmen, search, specialty, sortKey]);
 
   const startNew = () => setEditing({ ...emptyDraft(), id: "" });
   const startEdit = (c: Craftsman) => setEditing({ ...c });
@@ -34,7 +64,8 @@ function AdminCraftsmen() {
 
   const submit = (draft: Draft) => {
     if (!draft.name.trim()) return alert("Name is required.");
-    const finalImage = draft.image.trim() || `https://picsum.photos/seed/${draft.name.replace(/\s+/g, "-")}/600/800`;
+    const finalImage =
+      draft.image.trim() || `https://picsum.photos/seed/${draft.name.replace(/\s+/g, "-")}/600/800`;
     if (draft.id) {
       saveCraftsmen(craftsmen.map((c) => (c.id === draft.id ? { ...draft, image: finalImage } : c)));
     } else {
@@ -49,7 +80,9 @@ function AdminCraftsmen() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold">Craftsmen</h1>
-          <p className="text-sm text-muted-foreground">{craftsmen.length} artisans</p>
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} of {craftsmen.length} artisans
+          </p>
         </div>
         <button
           onClick={startNew}
@@ -60,8 +93,40 @@ function AdminCraftsmen() {
         </button>
       </div>
 
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search name, specialty, location…"
+          className="rounded-md border bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 sm:col-span-2"
+        />
+        <select
+          value={specialty}
+          onChange={(e) => setSpecialty(e.target.value)}
+          className="rounded-md border bg-card px-3 py-2 text-sm"
+        >
+          <option value="all">All specialties</option>
+          {specialties.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+      <div className="mt-2 inline-flex items-center gap-2 rounded-md border bg-card px-2 py-1 text-sm">
+        <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+        <select
+          value={sortKey}
+          onChange={(e) => setSortKey(e.target.value as SortKey)}
+          className="bg-transparent text-sm outline-none"
+        >
+          <option value="newest">Newest</option>
+          <option value="name-asc">Name A–Z</option>
+          <option value="name-desc">Name Z–A</option>
+          <option value="specialty">Specialty</option>
+        </select>
+      </div>
+
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {craftsmen.map((c) => (
+        {filtered.map((c) => (
           <div key={c.id} className="overflow-hidden rounded-xl border bg-card">
             <img src={c.image} alt={c.name} className="aspect-[4/3] w-full object-cover" />
             <div className="p-4">
@@ -86,6 +151,11 @@ function AdminCraftsmen() {
             </div>
           </div>
         ))}
+        {filtered.length === 0 && (
+          <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
+            No craftsmen match.
+          </p>
+        )}
       </div>
 
       {editing && (
@@ -145,9 +215,13 @@ function CraftsmanEditor({
           <F label="Years of experience" full>
             <input value={draft.years} onChange={(e) => update("years", e.target.value)} placeholder="e.g. 30+ years" className="i" />
           </F>
-          <F label="Image URL" full>
-            <input value={draft.image} onChange={(e) => update("image", e.target.value)} placeholder="https://…" className="i" />
-          </F>
+          <div className="md:col-span-2">
+            <ImageUpload
+              label="Portrait"
+              value={draft.image ? [draft.image] : []}
+              onChange={(imgs) => update("image", imgs[0] ?? "")}
+            />
+          </div>
           <F label="Short bio (card)" full>
             <textarea rows={2} value={draft.bioShort} onChange={(e) => update("bioShort", e.target.value)} className="i" />
           </F>
