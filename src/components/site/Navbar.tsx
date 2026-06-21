@@ -7,7 +7,6 @@ import { getWhatsAppLink } from "@/lib/whatsapp";
 const links = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop" },
-  { to: "/craftsmen", label: "Craftsmen" },
   { to: "/heritage", label: "Heritage" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },

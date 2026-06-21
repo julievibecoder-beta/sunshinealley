@@ -5,7 +5,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { CategoryBadge } from "@/components/site/CategoryBadge";
 import { WhatsAppCTA } from "@/components/site/WhatsAppButton";
-import { useProducts, useCraftsmen } from "@/lib/store";
+import { useProducts } from "@/lib/store";
 import { formatPrice, PHONE_TEL, PHONE_DISPLAY } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/shop/$slug")({
@@ -21,7 +21,6 @@ export const Route = createFileRoute("/shop/$slug")({
 function ProductPage() {
   const { slug } = Route.useParams();
   const products = useProducts();
-  const craftsmen = useCraftsmen();
   const [activeImg, setActiveImg] = useState(0);
 
   const product = products.find((p) => p.slug === slug);
@@ -39,7 +38,6 @@ function ProductPage() {
     );
   }
 
-  const artisan = craftsmen.find((c) => c.id === product.craftsmanId);
   const related = products
     .filter((p) => p.slug !== product.slug && p.category === product.category)
     .slice(0, 4);
@@ -56,6 +54,18 @@ function ProductPage() {
           <Link to="/shop" search={{ category: product.category }} className="hover:text-primary">
             {product.category}
           </Link>
+          {product.subcategory && (
+            <>
+              <span className="mx-2">/</span>
+              <Link
+                to="/shop"
+                search={{ category: product.category, subcategory: product.subcategory }}
+                className="hover:text-primary"
+              >
+                {product.subcategory}
+              </Link>
+            </>
+          )}
           <span className="mx-2">/</span>
           <span className="text-foreground">{product.name}</span>
         </nav>
@@ -94,7 +104,10 @@ function ProductPage() {
           </div>
 
           <div>
-            <CategoryBadge category={product.category} />
+            <div className="flex flex-wrap gap-2">
+              <CategoryBadge category={product.category} />
+              {product.subcategory && <CategoryBadge category={product.subcategory} />}
+            </div>
             <h1 className="mt-3 font-display text-3xl font-semibold md:text-4xl">{product.name}</h1>
             <p className="mt-3 font-display text-2xl font-semibold" style={{ color: "var(--primary-dark)" }}>
               {formatPrice(product.price)}
@@ -120,20 +133,6 @@ function ProductPage() {
                 <dd className="font-medium">Kashmir, India</dd>
               </div>
             </dl>
-
-            {artisan && (
-              <Link
-                to="/craftsmen"
-                className="mt-5 flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:border-primary"
-              >
-                <img src={artisan.image} alt={artisan.name} className="h-12 w-12 rounded-full object-cover" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Crafted by</p>
-                  <p className="text-sm font-semibold">{artisan.name}</p>
-                  <p className="text-xs text-muted-foreground">{artisan.specialty}</p>
-                </div>
-              </Link>
-            )}
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <WhatsAppCTA productName={product.name} size="lg" className="w-full sm:w-auto">

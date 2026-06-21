@@ -4,11 +4,11 @@ import { Search } from "lucide-react";
 import { z } from "zod";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
-import { categories, type Category } from "@/data/products";
-import { useProducts } from "@/lib/store";
+import { useProducts, useCategories } from "@/lib/store";
 
 const searchSchema = z.object({
-  category: z.enum(["Accessories", "Carpets", "Boxes", "Wearables"]).optional(),
+  category: z.string().optional(),
+  subcategory: z.string().optional(),
 });
 
 export const Route = createFileRoute("/shop")({
@@ -24,24 +24,33 @@ export const Route = createFileRoute("/shop")({
   component: Shop,
 });
 
-type Filter = Category | "All";
-
 function Shop() {
   const search = Route.useSearch();
-  const initial: Filter = (search.category as Filter) ?? "All";
-  const [filter, setFilter] = useState<Filter>(initial);
-  const [query, setQuery] = useState("");
+  const navigate = Route.useNavigate();
   const products = useProducts();
+  const categories = useCategories();
+  const [query, setQuery] = useState("");
+
+  const filter = search.category ?? "All";
+  const sub = search.subcategory;
+
+  const setFilter = (cat: string | undefined) => {
+    navigate({ search: cat ? { category: cat } : {} });
+  };
+  const setSub = (s: string | undefined) => {
+    navigate({ search: { category: filter === "All" ? undefined : filter, subcategory: s } });
+  };
+
+  const activeCat = categories.find((c) => c.name === filter);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
       if (filter !== "All" && p.category !== filter) return false;
+      if (sub && p.subcategory !== sub) return false;
       if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
       return true;
     });
-  }, [filter, query, products]);
-
-  const filters: Filter[] = ["All", ...categories];
+  }, [filter, sub, query, products]);
 
   return (
     <SiteShell>
@@ -56,23 +65,16 @@ function Shop() {
         <div className="sticky top-16 z-30 mt-10 -mx-4 border-y bg-background/90 px-4 py-4 backdrop-blur md:-mx-6 md:px-6">
           <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap gap-2">
-              {filters.map((f) => {
-                const active = f === filter;
-                return (
-                  <button
-                    key={f}
-                    onClick={() => setFilter(f)}
-                    className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                      active
-                        ? "border-transparent text-primary-foreground"
-                        : "bg-card text-foreground hover:border-primary hover:text-primary"
-                    }`}
-                    style={active ? { background: "var(--primary)" } : undefined}
-                  >
-                    {f}
-                  </button>
-                );
-              })}
+              <FilterPill active={filter === "All"} onClick={() => setFilter(undefined)}>All</FilterPill>
+              {categories.map((c) => (
+                <FilterPill
+                  key={c.id}
+                  active={filter === c.name}
+                  onClick={() => setFilter(c.name)}
+                >
+                  {c.name}
+                </FilterPill>
+              ))}
             </div>
             <div className="relative w-full md:w-72">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -84,6 +86,14 @@ function Shop() {
               />
             </div>
           </div>
+          {activeCat && activeCat.subcategories.length > 0 && (
+            <div className="mx-auto mt-3 flex max-w-7xl flex-wrap gap-2">
+              <SubPill active={!sub} onClick={() => setSub(undefined)}>All {activeCat.name}</SubPill>
+              {activeCat.subcategories.map((s) => (
+                <SubPill key={s} active={sub === s} onClick={() => setSub(s)}>{s}</SubPill>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -95,7 +105,7 @@ function Shop() {
         {filtered.length === 0 && (
           <div className="py-20 text-center text-muted-foreground">
             No pieces match your search.{" "}
-            <button onClick={() => { setFilter("All"); setQuery(""); }} className="text-primary underline">
+            <button onClick={() => { setFilter(undefined); setQuery(""); }} className="text-primary underline">
               Clear filters
             </button>
           </div>
@@ -110,5 +120,34 @@ function Shop() {
         </p>
       </section>
     </SiteShell>
+  );
+}
+
+function FilterPill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? "border-transparent text-primary-foreground"
+          : "bg-card text-foreground hover:border-primary hover:text-primary"
+      }`}
+      style={active ? { background: "var(--primary)" } : undefined}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SubPill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+        active ? "border-primary text-primary" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

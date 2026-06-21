@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, Users, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Package, Tags, FileSpreadsheet, LogOut, ExternalLink } from "lucide-react";
 import { useAuth, logout } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin")({
@@ -40,7 +40,8 @@ function AdminLayout() {
   const navItems = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/products", label: "Products", icon: Package, exact: false },
-    { to: "/admin/craftsmen", label: "Craftsmen", icon: Users, exact: false },
+    { to: "/admin/categories", label: "Categories", icon: Tags, exact: false },
+    { to: "/admin/data", label: "Import / Export", icon: FileSpreadsheet, exact: false },
   ] as const;
 
   return (
@@ -80,7 +81,7 @@ function AdminLayout() {
                   key={item.to}
                   to={item.to}
                   className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
-                    active ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                    active ? "text-primary-foreground" : "hover:bg-muted"
                   }`}
                   style={active ? { background: "var(--primary)" } : undefined}
                 >
@@ -92,14 +93,14 @@ function AdminLayout() {
           </nav>
         </aside>
         <main className="min-w-0 flex-1">
-          <div className="mb-4 flex gap-2 md:hidden">
+          <div className="mb-4 flex flex-wrap gap-2 md:hidden">
             {navItems.map((item) => {
               const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
               return (
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`flex-1 rounded-md border px-3 py-2 text-center text-xs font-medium ${
+                  className={`flex-1 rounded-md border px-2 py-2 text-center text-xs font-medium ${
                     active ? "border-transparent text-primary-foreground" : ""
                   }`}
                   style={active ? { background: "var(--primary)" } : undefined}

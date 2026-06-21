@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Package, Users, RotateCcw } from "lucide-react";
-import { useProducts, useCraftsmen, resetStore } from "@/lib/store";
+import { Package, Tags, FileSpreadsheet, RotateCcw } from "lucide-react";
+import { useProducts, useCategories, resetStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminHome,
@@ -8,23 +8,28 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminHome() {
   const products = useProducts();
-  const craftsmen = useCraftsmen();
+  const categories = useCategories();
   const published = products.filter((p) => p.inStock).length;
   const featured = products.filter((p) => p.featured).length;
+  const subCount = categories.reduce((n, c) => n + c.subcategories.length, 0);
 
   const stats = [
     { label: "Total products", value: products.length },
     { label: "Published (in stock)", value: published },
     { label: "Featured", value: featured },
-    { label: "Craftsmen", value: craftsmen.length },
+    { label: "Categories / Sub", value: `${categories.length} / ${subCount}` },
+  ];
+
+  const tiles = [
+    { to: "/admin/products", icon: Package, title: "Products", desc: "Add, edit, or unpublish pieces." },
+    { to: "/admin/categories", icon: Tags, title: "Categories", desc: "Manage categories & subcategories." },
+    { to: "/admin/data", icon: FileSpreadsheet, title: "Import / Export", desc: "Move catalogue via Excel." },
   ];
 
   return (
     <div>
       <h1 className="font-display text-3xl font-semibold">Dashboard</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Manage your catalogue and artisan profiles.
-      </p>
+      <p className="mt-1 text-sm text-muted-foreground">Manage your catalogue.</p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {stats.map((s) => (
@@ -35,41 +40,25 @@ function AdminHome() {
         ))}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Link
-          to="/admin/products"
-          className="group flex items-start gap-4 rounded-xl border bg-card p-6 transition-colors hover:border-primary"
-        >
-          <div
-            className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
-            style={{ background: "var(--primary-light)", color: "var(--primary-dark)" }}
+      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {tiles.map((t) => (
+          <Link
+            key={t.to}
+            to={t.to}
+            className="group flex items-start gap-4 rounded-xl border bg-card p-6 transition-colors hover:border-primary"
           >
-            <Package className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="font-display text-xl font-semibold group-hover:text-primary">Products</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Add, edit, or unpublish pieces in your shop.
-            </p>
-          </div>
-        </Link>
-        <Link
-          to="/admin/craftsmen"
-          className="group flex items-start gap-4 rounded-xl border bg-card p-6 transition-colors hover:border-primary"
-        >
-          <div
-            className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
-            style={{ background: "var(--primary-light)", color: "var(--primary-dark)" }}
-          >
-            <Users className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="font-display text-xl font-semibold group-hover:text-primary">Craftsmen</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Manage artisan biographies and photographs.
-            </p>
-          </div>
-        </Link>
+            <div
+              className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
+              style={{ background: "var(--primary-light)", color: "var(--primary-dark)" }}
+            >
+              <t.icon className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-display text-xl font-semibold group-hover:text-primary">{t.title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t.desc}</p>
+            </div>
+          </Link>
+        ))}
       </div>
 
       <div className="mt-10 rounded-xl border bg-card p-5">
@@ -79,7 +68,7 @@ function AdminHome() {
         </p>
         <button
           onClick={() => {
-            if (confirm("Reset all products and craftsmen to defaults? This cannot be undone.")) {
+            if (confirm("Reset all data to defaults? This cannot be undone.")) {
               resetStore();
             }
           }}

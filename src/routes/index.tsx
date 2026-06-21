@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shield, Users, MessageCircle, ArrowRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
-import { useProducts, useCraftsmen } from "@/lib/store";
+import { useProducts, useCategories } from "@/lib/store";
+import { slugify } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,18 +18,10 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const categoryTiles = [
-  { name: "Accessories", seed: "kashmir-acc" },
-  { name: "Carpets", seed: "kashmir-carpet" },
-  { name: "Boxes", seed: "kashmir-box" },
-  { name: "Wearables", seed: "kashmir-wear" },
-] as const;
-
 function Home() {
   const products = useProducts();
-  const craftsmen = useCraftsmen();
+  const categories = useCategories();
   const featured = products.filter((p) => p.featured).slice(0, 8);
-  const teaserArtisans = craftsmen.slice(0, 3);
 
   return (
     <SiteShell>
@@ -77,16 +70,16 @@ function Home() {
           <p className="mt-2 text-muted-foreground">Explore Kashmir's living craft traditions.</p>
         </div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {categoryTiles.map((tile) => (
+          {categories.map((cat) => (
             <Link
-              key={tile.name}
+              key={cat.id}
               to="/shop"
-              search={{ category: tile.name }}
+              search={{ category: cat.name }}
               className="group relative block aspect-[4/3] overflow-hidden rounded-2xl shadow-soft"
             >
               <img
-                src={`https://picsum.photos/seed/${tile.seed}/900/700`}
-                alt={tile.name}
+                src={`https://picsum.photos/seed/kashmir-${slugify(cat.name)}/900/700`}
+                alt={cat.name}
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
               />
@@ -94,10 +87,13 @@ function Home() {
                 className="absolute inset-0 transition-opacity group-hover:bg-black/35"
                 style={{ background: "rgba(0,0,0,0.5)" }}
               />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-display text-3xl font-semibold text-white md:text-4xl">
-                  {tile.name}
-                </span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                <span className="font-display text-3xl font-semibold md:text-4xl">{cat.name}</span>
+                {cat.subcategories.length > 0 && (
+                  <span className="mt-2 max-w-md text-center text-xs text-white/80">
+                    {cat.subcategories.slice(0, 4).join(" · ")}
+                  </span>
+                )}
               </div>
             </Link>
           ))}
@@ -124,41 +120,6 @@ function Home() {
               className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark"
             >
               View entire collection <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Craftsmen teaser */}
-      <section style={{ background: "var(--primary-light)" }}>
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
-          <div className="mb-10 text-center">
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">The Hands Behind the Craft</h2>
-            <p className="mt-2 text-muted-foreground">Generations of mastery, one piece at a time.</p>
-          </div>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {teaserArtisans.map((a) => (
-              <div key={a.id} className="flex flex-col items-center text-center">
-                <img
-                  src={a.image}
-                  alt={a.name}
-                  loading="lazy"
-                  className="h-32 w-32 rounded-full object-cover shadow-warm"
-                />
-                <h3 className="mt-4 font-display text-xl font-semibold">{a.name}</h3>
-                <p className="text-sm text-muted-foreground">{a.specialty}</p>
-                <p className="mt-3 max-w-xs text-sm leading-relaxed text-foreground/80">
-                  {a.bioShort}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 text-center">
-            <Link
-              to="/craftsmen"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark"
-            >
-              Meet all our artisans <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

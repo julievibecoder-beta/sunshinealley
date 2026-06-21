@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as HeritageRouteImport } from './routes/heritage'
-import { Route as CraftsmenRouteImport } from './routes/craftsmen'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -20,7 +19,8 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminCraftsmenRouteImport } from './routes/admin.craftsmen'
+import { Route as AdminDataRouteImport } from './routes/admin.data'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
@@ -30,11 +30,6 @@ const ShopRoute = ShopRouteImport.update({
 const HeritageRoute = HeritageRouteImport.update({
   id: '/heritage',
   path: '/heritage',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CraftsmenRoute = CraftsmenRouteImport.update({
-  id: '/craftsmen',
-  path: '/craftsmen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -77,9 +72,14 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminCraftsmenRoute = AdminCraftsmenRouteImport.update({
-  id: '/craftsmen',
-  path: '/craftsmen',
+const AdminDataRoute = AdminDataRouteImport.update({
+  id: '/data',
+  path: '/data',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -88,10 +88,10 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
-  '/craftsmen': typeof CraftsmenRoute
   '/heritage': typeof HeritageRoute
   '/shop': typeof ShopRouteWithChildren
-  '/admin/craftsmen': typeof AdminCraftsmenRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/data': typeof AdminDataRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -101,10 +101,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
-  '/craftsmen': typeof CraftsmenRoute
   '/heritage': typeof HeritageRoute
   '/shop': typeof ShopRouteWithChildren
-  '/admin/craftsmen': typeof AdminCraftsmenRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/data': typeof AdminDataRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -116,10 +116,10 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
-  '/craftsmen': typeof CraftsmenRoute
   '/heritage': typeof HeritageRoute
   '/shop': typeof ShopRouteWithChildren
-  '/admin/craftsmen': typeof AdminCraftsmenRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/data': typeof AdminDataRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -132,10 +132,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/contact'
-    | '/craftsmen'
     | '/heritage'
     | '/shop'
-    | '/admin/craftsmen'
+    | '/admin/categories'
+    | '/admin/data'
     | '/admin/login'
     | '/admin/products'
     | '/shop/$slug'
@@ -145,10 +145,10 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
-    | '/craftsmen'
     | '/heritage'
     | '/shop'
-    | '/admin/craftsmen'
+    | '/admin/categories'
+    | '/admin/data'
     | '/admin/login'
     | '/admin/products'
     | '/shop/$slug'
@@ -159,10 +159,10 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/contact'
-    | '/craftsmen'
     | '/heritage'
     | '/shop'
-    | '/admin/craftsmen'
+    | '/admin/categories'
+    | '/admin/data'
     | '/admin/login'
     | '/admin/products'
     | '/shop/$slug'
@@ -174,7 +174,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
-  CraftsmenRoute: typeof CraftsmenRoute
   HeritageRoute: typeof HeritageRoute
   ShopRoute: typeof ShopRouteWithChildren
 }
@@ -193,13 +192,6 @@ declare module '@tanstack/react-router' {
       path: '/heritage'
       fullPath: '/heritage'
       preLoaderRoute: typeof HeritageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/craftsmen': {
-      id: '/craftsmen'
-      path: '/craftsmen'
-      fullPath: '/craftsmen'
-      preLoaderRoute: typeof CraftsmenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -258,25 +250,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/craftsmen': {
-      id: '/admin/craftsmen'
-      path: '/craftsmen'
-      fullPath: '/admin/craftsmen'
-      preLoaderRoute: typeof AdminCraftsmenRouteImport
+    '/admin/data': {
+      id: '/admin/data'
+      path: '/data'
+      fullPath: '/admin/data'
+      preLoaderRoute: typeof AdminDataRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
   }
 }
 
 interface AdminRouteChildren {
-  AdminCraftsmenRoute: typeof AdminCraftsmenRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminDataRoute: typeof AdminDataRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminCraftsmenRoute: AdminCraftsmenRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminDataRoute: AdminDataRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -299,7 +300,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
-  CraftsmenRoute: CraftsmenRoute,
   HeritageRoute: HeritageRoute,
   ShopRoute: ShopRouteWithChildren,
 }
