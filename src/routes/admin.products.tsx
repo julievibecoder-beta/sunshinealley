@@ -3,13 +3,11 @@ import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Star, X, ArrowUpDown } from "lucide-react";
 import {
   useProducts,
-  useCraftsmen,
+  useCategories,
   saveProducts,
   slugify,
   type Product,
-  type Category,
 } from "@/lib/store";
-import { categories } from "@/data/products";
 import { formatPrice } from "@/lib/whatsapp";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
@@ -19,16 +17,16 @@ export const Route = createFileRoute("/admin/products")({
 
 type Draft = Omit<Product, "id" | "slug"> & { id?: string; slug?: string };
 
-const emptyDraft = (): Draft => ({
+const emptyDraft = (defaultCat: string): Draft => ({
   name: "",
-  category: "Carpets",
+  category: defaultCat,
+  subcategory: "",
   featured: false,
   price: undefined,
   description: "",
   dimensions: "",
   material: "",
   technique: "",
-  craftsmanId: "",
   images: [],
   inStock: true,
 });
@@ -38,16 +36,16 @@ type StatusFilter = "all" | "published" | "hidden" | "featured";
 
 function AdminProducts() {
   const products = useProducts();
-  const craftsmen = useCraftsmen();
+  const categories = useCategories();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<"all" | Category>("all");
+  const [category, setCategory] = useState<string>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
   const [editing, setEditing] = useState<Draft | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    let list = products.filter((p) => {
+    const list = products.filter((p) => {
       if (category !== "all" && p.category !== category) return false;
       if (status === "published" && !p.inStock) return false;
       if (status === "hidden" && p.inStock) return false;
@@ -56,6 +54,7 @@ function AdminProducts() {
       return (
         p.name.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||
+        (p.subcategory ?? "").toLowerCase().includes(q) ||
         p.material.toLowerCase().includes(q) ||
         p.technique.toLowerCase().includes(q)
       );
@@ -71,7 +70,7 @@ function AdminProducts() {
     return [...list].sort(cmp[sortKey]);
   }, [products, search, category, status, sortKey]);
 
-  const startNew = () => setEditing(emptyDraft());
+  const startNew = () => setEditing(emptyDraft(categories[0]?.name ?? ""));
   const startEdit = (p: Product) => setEditing({ ...p });
 
   const remove = (id: string) => {
@@ -145,12 +144,12 @@ function AdminProducts() {
         />
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value as "all" | Category)}
+          onChange={(e) => setCategory(e.target.value)}
           className="rounded-md border bg-card px-3 py-2 text-sm"
         >
           <option value="all">All categories</option>
           {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c.id} value={c.name}>{c.name}</option>
           ))}
         </select>
         <select
@@ -218,7 +217,12 @@ function AdminProducts() {
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3">{p.category}</td>
+                <td className="px-4 py-3">
+                  <div>{p.category}</div>
+                  {p.subcategory && (
+                    <div className="text-xs text-muted-foreground">{p.subcategory}</div>
+                  )}
+                </td>
                 <td className="px-4 py-3">{formatPrice(p.price)}</td>
                 <td className="px-4 py-3">
                   <button
@@ -262,7 +266,6 @@ function AdminProducts() {
       {editing && (
         <ProductEditor
           draft={editing}
-          craftsmenOptions={craftsmen}
           onChange={setEditing}
           onCancel={() => setEditing(null)}
           onSubmit={submit}
@@ -274,18 +277,19 @@ function AdminProducts() {
 
 function ProductEditor({
   draft,
-  craftsmenOptions,
   onChange,
   onCancel,
   onSubmit,
 }: {
   draft: Draft;
-  craftsmenOptions: { id: string; name: string }[];
   onChange: (d: Draft) => void;
   onCancel: () => void;
   onSubmit: (d: Draft) => void;
 }) {
-  const update = <K extends keyof Draft>(key: K, value: Draft[K]) => onChange({ ...draft, [key]: value });
+  const categories = useCategories();
+  const update = <K extends keyof Draft>(key: K, value: Draft[K]) =>
+    onChange({ ...draft, [key]: value });
+  const activeCat = categories.find((c) => c.name === draft.category);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/60 p-4" onClick={onCancel}>
@@ -318,13 +322,35 @@ function ProductEditor({
           <Field label="Category">
             <select
               value={draft.category}
-              onChange={(e) => update("category", e.target.value as Category)}
+              onChange={(e) => onChange({ ...draft, category: e.target.value, subcategory: "" })}
               className="input"
             >
+              {categories.length === 0 && <option value="">— No categories —</option>}
               {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c.id} value={c.name}>{c.name}</option>
               ))}
             </select>
+          </Field>
+          <Field label="Subcategory">
+            {activeCat && activeCat.subcategories.length > 0 ? (
+              <select
+                value={draft.subcategory ?? ""}
+                onChange={(e) => update("subcategory", e.target.value)}
+                className="input"
+              >
+                <option value="">— None —</option>
+                {activeCat.subcategories.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={draft.subcategory ?? ""}
+                onChange={(e) => update("subcategory", e.target.value)}
+                placeholder="(no subcategories defined)"
+                className="input"
+              />
+            )}
           </Field>
           <Field label="Price (INR)">
             <input
@@ -342,18 +368,6 @@ function ProductEditor({
           </Field>
           <Field label="Technique" full>
             <input value={draft.technique} onChange={(e) => update("technique", e.target.value)} className="input" />
-          </Field>
-          <Field label="Craftsman" full>
-            <select
-              value={draft.craftsmanId}
-              onChange={(e) => update("craftsmanId", e.target.value)}
-              className="input"
-            >
-              <option value="">— None —</option>
-              {craftsmenOptions.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
           </Field>
           <Field label="Description" full>
             <textarea

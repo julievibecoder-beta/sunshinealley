@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { products as seedProducts, type Product, type Category } from "@/data/products";
-import { craftsmen as seedCraftsmen, type Craftsman } from "@/data/craftsmen";
+import {
+  products as seedProducts,
+  categoriesSeed,
+  type Product,
+  type CategoryDef,
+} from "@/data/products";
 
 const PRODUCTS_KEY = "kc_products_v1";
-const CRAFTSMEN_KEY = "kc_craftsmen_v1";
+const CATEGORIES_KEY = "kc_categories_v1";
 const CHANGE_EVENT = "kc-store-change";
 
 const isClient = typeof window !== "undefined";
@@ -31,17 +35,22 @@ export function loadProducts(): Product[] {
 export function saveProducts(items: Product[]) {
   write(PRODUCTS_KEY, items);
 }
-export function loadCraftsmen(): Craftsman[] {
-  return read(CRAFTSMEN_KEY, seedCraftsmen);
+export function loadCategories(): CategoryDef[] {
+  return read(CATEGORIES_KEY, categoriesSeed);
 }
-export function saveCraftsmen(items: Craftsman[]) {
-  write(CRAFTSMEN_KEY, items);
+export function saveCategories(items: CategoryDef[]) {
+  write(CATEGORIES_KEY, items);
+}
+
+export function notifyStoreChange() {
+  if (!isClient) return;
+  window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export function resetStore() {
   if (!isClient) return;
   localStorage.removeItem(PRODUCTS_KEY);
-  localStorage.removeItem(CRAFTSMEN_KEY);
+  localStorage.removeItem(CATEGORIES_KEY);
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
@@ -64,8 +73,8 @@ function useStore<T>(loader: () => T): T {
 export function useProducts(): Product[] {
   return useStore(loadProducts);
 }
-export function useCraftsmen(): Craftsman[] {
-  return useStore(loadCraftsmen);
+export function useCategories(): CategoryDef[] {
+  return useStore(loadCategories);
 }
 
 export function slugify(name: string): string {
@@ -76,4 +85,4 @@ export function slugify(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export type { Product, Craftsman, Category };
+export type { Product, CategoryDef };

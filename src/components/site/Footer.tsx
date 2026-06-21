@@ -22,7 +22,6 @@ export function Footer() {
           <ul className="mt-3 space-y-2 text-sm">
             {[
               { to: "/shop", label: "Shop" },
-              { to: "/craftsmen", label: "Craftsmen" },
               { to: "/heritage", label: "Heritage" },
               { to: "/about", label: "About" },
               { to: "/contact", label: "Contact" },
