@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Star, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, X, ArrowUpDown } from "lucide-react";
 import {
   useProducts,
   useCraftsmen,
@@ -11,12 +11,13 @@ import {
 } from "@/lib/store";
 import { categories } from "@/data/products";
 import { formatPrice } from "@/lib/whatsapp";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/admin/products")({
   component: AdminProducts,
 });
 
-type Draft = Omit<Product, "id" | "slug" | "images"> & { id?: string; slug?: string; imagesText: string };
+type Draft = Omit<Product, "id" | "slug"> & { id?: string; slug?: string };
 
 const emptyDraft = (): Draft => ({
   name: "",
@@ -28,42 +29,50 @@ const emptyDraft = (): Draft => ({
   material: "",
   technique: "",
   craftsmanId: "",
-  imagesText: "",
+  images: [],
   inStock: true,
 });
+
+type SortKey = "name-asc" | "name-desc" | "price-asc" | "price-desc" | "featured" | "newest";
+type StatusFilter = "all" | "published" | "hidden" | "featured";
 
 function AdminProducts() {
   const products = useProducts();
   const craftsmen = useCraftsmen();
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<"all" | Category>("all");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("newest");
   const [editing, setEditing] = useState<Draft | null>(null);
 
-  const filtered = useMemo(
-    () =>
-      products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.category.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [products, search],
-  );
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    let list = products.filter((p) => {
+      if (category !== "all" && p.category !== category) return false;
+      if (status === "published" && !p.inStock) return false;
+      if (status === "hidden" && p.inStock) return false;
+      if (status === "featured" && !p.featured) return false;
+      if (!q) return true;
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.material.toLowerCase().includes(q) ||
+        p.technique.toLowerCase().includes(q)
+      );
+    });
+    const cmp: Record<SortKey, (a: Product, b: Product) => number> = {
+      "name-asc": (a, b) => a.name.localeCompare(b.name),
+      "name-desc": (a, b) => b.name.localeCompare(a.name),
+      "price-asc": (a, b) => (a.price ?? Infinity) - (b.price ?? Infinity),
+      "price-desc": (a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity),
+      featured: (a, b) => Number(b.featured) - Number(a.featured) || a.name.localeCompare(b.name),
+      newest: (a, b) => Number(b.id) - Number(a.id),
+    };
+    return [...list].sort(cmp[sortKey]);
+  }, [products, search, category, status, sortKey]);
 
   const startNew = () => setEditing(emptyDraft());
-  const startEdit = (p: Product) =>
-    setEditing({
-      id: p.id,
-      slug: p.slug,
-      name: p.name,
-      category: p.category,
-      featured: p.featured,
-      price: p.price,
-      description: p.description,
-      dimensions: p.dimensions,
-      material: p.material,
-      technique: p.technique,
-      craftsmanId: p.craftsmanId,
-      imagesText: p.images.join("\n"),
-      inStock: p.inStock,
-    });
+  const startEdit = (p: Product) => setEditing({ ...p });
 
   const remove = (id: string) => {
     if (!confirm("Delete this product?")) return;
@@ -76,30 +85,14 @@ function AdminProducts() {
 
   const submit = (draft: Draft) => {
     if (!draft.name.trim()) return alert("Name is required.");
-    const images = draft.imagesText
-      .split(/\n+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    const finalImages = images.length > 0 ? images : [`https://picsum.photos/seed/${slugify(draft.name)}/800/800`];
+    const finalImages =
+      draft.images.length > 0
+        ? draft.images
+        : [`https://picsum.photos/seed/${slugify(draft.name)}/800/800`];
 
     if (draft.id) {
       const next = products.map((p) =>
-        p.id === draft.id
-          ? {
-              ...p,
-              name: draft.name.trim(),
-              category: draft.category,
-              featured: draft.featured,
-              price: draft.price,
-              description: draft.description,
-              dimensions: draft.dimensions,
-              material: draft.material,
-              technique: draft.technique,
-              craftsmanId: draft.craftsmanId,
-              inStock: draft.inStock,
-              images: finalImages,
-            }
-          : p,
+        p.id === draft.id ? { ...(draft as Product), images: finalImages, slug: p.slug } : p,
       );
       saveProducts(next);
     } else {
@@ -108,18 +101,9 @@ function AdminProducts() {
       const existing = new Set(products.map((p) => p.slug));
       if (existing.has(slug)) slug = `${slug}-${id.slice(-4)}`;
       const next: Product = {
+        ...(draft as Product),
         id,
         slug,
-        name: draft.name.trim(),
-        category: draft.category,
-        featured: draft.featured,
-        price: draft.price,
-        description: draft.description,
-        dimensions: draft.dimensions,
-        material: draft.material,
-        technique: draft.technique,
-        craftsmanId: draft.craftsmanId,
-        inStock: draft.inStock,
         images: finalImages,
       };
       saveProducts([next, ...products]);
@@ -127,12 +111,21 @@ function AdminProducts() {
     setEditing(null);
   };
 
+  const clearFilters = () => {
+    setSearch("");
+    setCategory("all");
+    setStatus("all");
+    setSortKey("newest");
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold">Products</h1>
-          <p className="text-sm text-muted-foreground">{products.length} pieces in catalogue</p>
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} of {products.length} pieces
+          </p>
         </div>
         <button
           onClick={startNew}
@@ -143,12 +136,59 @@ function AdminProducts() {
         </button>
       </div>
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search by name or category…"
-        className="mt-4 w-full rounded-md border bg-card px-3 py-2 text-sm outline-none ring-primary/30 focus:ring-2"
-      />
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search name, material, technique…"
+          className="rounded-md border bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 lg:col-span-2"
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as "all" | Category)}
+          className="rounded-md border bg-card px-3 py-2 text-sm"
+        >
+          <option value="all">All categories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value as StatusFilter)}
+          className="rounded-md border bg-card px-3 py-2 text-sm"
+        >
+          <option value="all">All statuses</option>
+          <option value="published">Published</option>
+          <option value="hidden">Hidden</option>
+          <option value="featured">Featured</option>
+        </select>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="inline-flex items-center gap-2 rounded-md border bg-card px-2 py-1 text-sm">
+          <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="bg-transparent text-sm outline-none"
+          >
+            <option value="newest">Newest</option>
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="price-asc">Price low → high</option>
+            <option value="price-desc">Price high → low</option>
+            <option value="featured">Featured first</option>
+          </select>
+        </div>
+        {(search || category !== "all" || status !== "all" || sortKey !== "newest") && (
+          <button
+            onClick={clearFilters}
+            className="rounded-md border px-2 py-1 text-xs hover:border-primary hover:text-primary"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border bg-card">
         <table className="w-full text-sm">
@@ -323,15 +363,14 @@ function ProductEditor({
               className="input"
             />
           </Field>
-          <Field label="Image URLs (one per line)" full>
-            <textarea
-              rows={3}
-              value={draft.imagesText}
-              onChange={(e) => update("imagesText", e.target.value)}
-              placeholder="https://…"
-              className="input font-mono text-xs"
+          <div className="md:col-span-2">
+            <ImageUpload
+              label="Images"
+              multiple
+              value={draft.images}
+              onChange={(imgs) => update("images", imgs)}
             />
-          </Field>
+          </div>
 
           <label className="flex items-center gap-2 text-sm">
             <input
