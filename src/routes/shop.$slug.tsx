@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Phone } from "lucide-react";
+import { Phone, ChevronLeft, ChevronRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { CategoryBadge } from "@/components/site/CategoryBadge";
