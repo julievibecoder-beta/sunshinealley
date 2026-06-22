@@ -42,6 +42,35 @@ export function saveCategories(items: CategoryDef[]) {
   write(CATEGORIES_KEY, items);
 }
 
+/**
+ * Save categories AND cascade rename changes onto products so the
+ * category/subcategory link is preserved when names are edited.
+ *
+ * categoryRenames : map of old category name -> new category name
+ * subRenames      : map keyed by NEW category name, then old subcategory
+ *                   name -> new subcategory name
+ */
+export function saveCategoriesWithCascade(
+  items: CategoryDef[],
+  categoryRenames: Record<string, string> = {},
+  subRenames: Record<string, Record<string, string>> = {},
+) {
+  const products = loadProducts();
+  const updated = products.map((p) => {
+    let category = p.category;
+    let subcategory = p.subcategory;
+    if (categoryRenames[category]) category = categoryRenames[category];
+    const subMap = subRenames[category];
+    if (subMap && subcategory && subMap[subcategory]) {
+      subcategory = subMap[subcategory];
+    }
+    if (category === p.category && subcategory === p.subcategory) return p;
+    return { ...p, category, subcategory };
+  });
+  saveProducts(updated);
+  saveCategories(items);
+}
+
 export function notifyStoreChange() {
   if (!isClient) return;
   window.dispatchEvent(new Event(CHANGE_EVENT));
