@@ -7,6 +7,7 @@ type Props = {
   onChange: (next: string[]) => void;
   multiple?: boolean;
   label?: string;
+  max?: number;
 };
 
 export function ImageUpload({ value, onChange, multiple = false, label }: Props) {
