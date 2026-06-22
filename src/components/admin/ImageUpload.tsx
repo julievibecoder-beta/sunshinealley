@@ -138,7 +138,7 @@ export function ImageUpload({ value, onChange, multiple = false, label, max }: P
       </div>
       {error && <p className="text-xs text-destructive">{error}</p>}
       <p className="text-xs text-muted-foreground">
-        Images are resized to 1200px max and stored locally in this browser.
+        {max ? `Up to ${max} image${max === 1 ? "" : "s"}. ` : ""}Images are resized to 1200px max and stored locally in this browser.
       </p>
     </div>
   );
