@@ -11,7 +11,7 @@ const searchSchema = z.object({
   subcategory: z.string().optional(),
 });
 
-export const Route = createFileRoute("/shop")({
+export const Route = createFileRoute("/shop/")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
