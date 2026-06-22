@@ -80,6 +80,34 @@ function ProductPage() {
                   className="h-full w-full object-cover"
                 />
               )}
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setActiveImg((safeIdx - 1 + product.images.length) % product.images.length)}
+                    aria-label="Previous image"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 shadow-soft hover:bg-background"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveImg((safeIdx + 1) % product.images.length)}
+                    aria-label="Next image"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 shadow-soft hover:bg-background"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                    {product.images.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all ${i === safeIdx ? "w-5 bg-background" : "w-1.5 bg-background/60"}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
               {!product.inStock && (
                 <div className="absolute inset-0 flex items-center justify-center bg-foreground/55">
                   <span className="rounded-md bg-background/95 px-4 py-2 text-sm font-semibold">Out of Stock</span>
