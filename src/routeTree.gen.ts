@@ -9,12 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ShopRouteImport } from './routes/shop'
 import { Route as HeritageRouteImport } from './routes/heritage'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
@@ -22,11 +22,6 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminDataRouteImport } from './routes/admin.data'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HeritageRoute = HeritageRouteImport.update({
   id: '/heritage',
   path: '/heritage',
@@ -52,15 +47,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/shop/',
+  path: '/shop/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
 const ShopSlugRoute = ShopSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ShopRoute,
+  id: '/shop/$slug',
+  path: '/shop/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
@@ -89,26 +89,26 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/heritage': typeof HeritageRoute
-  '/shop': typeof ShopRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/data': typeof AdminDataRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/heritage': typeof HeritageRoute
-  '/shop': typeof ShopRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/data': typeof AdminDataRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/shop': typeof ShopIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,13 +117,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/heritage': typeof HeritageRoute
-  '/shop': typeof ShopRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/data': typeof AdminDataRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -133,26 +133,26 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/heritage'
-    | '/shop'
     | '/admin/categories'
     | '/admin/data'
     | '/admin/login'
     | '/admin/products'
     | '/shop/$slug'
     | '/admin/'
+    | '/shop/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
     | '/heritage'
-    | '/shop'
     | '/admin/categories'
     | '/admin/data'
     | '/admin/login'
     | '/admin/products'
     | '/shop/$slug'
     | '/admin'
+    | '/shop'
   id:
     | '__root__'
     | '/'
@@ -160,13 +160,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/heritage'
-    | '/shop'
     | '/admin/categories'
     | '/admin/data'
     | '/admin/login'
     | '/admin/products'
     | '/shop/$slug'
     | '/admin/'
+    | '/shop/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -175,18 +175,12 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
   HeritageRoute: typeof HeritageRoute
-  ShopRoute: typeof ShopRouteWithChildren
+  ShopSlugRoute: typeof ShopSlugRoute
+  ShopIndexRoute: typeof ShopIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/heritage': {
       id: '/heritage'
       path: '/heritage'
@@ -222,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/': {
+      id: '/shop/'
+      path: '/shop'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -231,10 +232,10 @@ declare module '@tanstack/react-router' {
     }
     '/shop/$slug': {
       id: '/shop/$slug'
-      path: '/$slug'
+      path: '/shop/$slug'
       fullPath: '/shop/$slug'
       preLoaderRoute: typeof ShopSlugRouteImport
-      parentRoute: typeof ShopRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/products': {
       id: '/admin/products'
@@ -285,23 +286,14 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface ShopRouteChildren {
-  ShopSlugRoute: typeof ShopSlugRoute
-}
-
-const ShopRouteChildren: ShopRouteChildren = {
-  ShopSlugRoute: ShopSlugRoute,
-}
-
-const ShopRouteWithChildren = ShopRoute._addFileChildren(ShopRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
   HeritageRoute: HeritageRoute,
-  ShopRoute: ShopRouteWithChildren,
+  ShopSlugRoute: ShopSlugRoute,
+  ShopIndexRoute: ShopIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

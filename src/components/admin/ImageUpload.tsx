@@ -7,13 +7,17 @@ type Props = {
   onChange: (next: string[]) => void;
   multiple?: boolean;
   label?: string;
+  max?: number;
 };
 
-export function ImageUpload({ value, onChange, multiple = false, label }: Props) {
+export function ImageUpload({ value, onChange, multiple = false, label, max }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [urlDraft, setUrlDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const cap = max ?? (multiple ? Infinity : 1);
+  const atLimit = value.length >= cap;
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -26,7 +30,12 @@ export function ImageUpload({ value, onChange, multiple = false, label }: Props)
         converted.push(await fileToDataUrl(f));
         if (!multiple) break;
       }
-      onChange(multiple ? [...value, ...converted] : converted.slice(0, 1));
+      const merged = multiple ? [...value, ...converted] : converted.slice(0, 1);
+      const capped = merged.slice(0, cap);
+      if (merged.length > capped.length) {
+        setError(`Only ${cap} image${cap === 1 ? "" : "s"} allowed.`);
+      }
+      onChange(capped);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
     } finally {
@@ -38,7 +47,11 @@ export function ImageUpload({ value, onChange, multiple = false, label }: Props)
   const addUrl = () => {
     const u = urlDraft.trim();
     if (!u) return;
-    onChange(multiple ? [...value, u] : [u]);
+    if (atLimit && multiple) {
+      setError(`Only ${cap} images allowed.`);
+      return;
+    }
+    onChange(multiple ? [...value, u].slice(0, cap) : [u]);
     setUrlDraft("");
   };
 
@@ -83,7 +96,7 @@ export function ImageUpload({ value, onChange, multiple = false, label }: Props)
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          disabled={busy}
+          disabled={busy || (atLimit && multiple)}
           onClick={() => inputRef.current?.click()}
           className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:border-primary hover:text-primary disabled:opacity-50"
         >
@@ -125,7 +138,7 @@ export function ImageUpload({ value, onChange, multiple = false, label }: Props)
       </div>
       {error && <p className="text-xs text-destructive">{error}</p>}
       <p className="text-xs text-muted-foreground">
-        Images are resized to 1200px max and stored locally in this browser.
+        {max ? `Up to ${max} image${max === 1 ? "" : "s"}. ` : ""}Images are resized to 1200px max and stored locally in this browser.
       </p>
     </div>
   );

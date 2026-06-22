@@ -379,8 +379,9 @@ function ProductEditor({
           </Field>
           <div className="md:col-span-2">
             <ImageUpload
-              label="Images"
+              label="Images (max 3)"
               multiple
+              max={3}
               value={draft.images}
               onChange={(imgs) => update("images", imgs)}
             />
