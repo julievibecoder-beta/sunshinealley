@@ -96,7 +96,7 @@ export function ImageUpload({ value, onChange, multiple = false, label, max }: P
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          disabled={busy}
+          disabled={busy || (atLimit && multiple)}
           onClick={() => inputRef.current?.click()}
           className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:border-primary hover:text-primary disabled:opacity-50"
         >
