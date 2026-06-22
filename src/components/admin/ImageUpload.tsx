@@ -16,6 +16,9 @@ export function ImageUpload({ value, onChange, multiple = false, label, max }: P
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const cap = max ?? (multiple ? Infinity : 1);
+  const atLimit = value.length >= cap;
+
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setBusy(true);
@@ -27,7 +30,12 @@ export function ImageUpload({ value, onChange, multiple = false, label, max }: P
         converted.push(await fileToDataUrl(f));
         if (!multiple) break;
       }
-      onChange(multiple ? [...value, ...converted] : converted.slice(0, 1));
+      const merged = multiple ? [...value, ...converted] : converted.slice(0, 1);
+      const capped = merged.slice(0, cap);
+      if (merged.length > capped.length) {
+        setError(`Only ${cap} image${cap === 1 ? "" : "s"} allowed.`);
+      }
+      onChange(capped);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
     } finally {
@@ -39,7 +47,11 @@ export function ImageUpload({ value, onChange, multiple = false, label, max }: P
   const addUrl = () => {
     const u = urlDraft.trim();
     if (!u) return;
-    onChange(multiple ? [...value, u] : [u]);
+    if (atLimit && multiple) {
+      setError(`Only ${cap} images allowed.`);
+      return;
+    }
+    onChange(multiple ? [...value, u].slice(0, cap) : [u]);
     setUrlDraft("");
   };
 
