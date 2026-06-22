@@ -200,14 +200,8 @@ function CategoryEditor({
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
 
-  const dupeIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    draft.subs.forEach((s, i) => {
-      const k = s.name.trim().toLowerCase();
-      if (k) map.set(k, (map.get(k) ?? 0) + 1);
-    });
-    return map;
-  }, [draft.subs]);
+
+
 
   const addSub = () => {
     const v = newSub.trim();
