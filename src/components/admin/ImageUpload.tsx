@@ -10,7 +10,7 @@ type Props = {
   max?: number;
 };
 
-export function ImageUpload({ value, onChange, multiple = false, label }: Props) {
+export function ImageUpload({ value, onChange, multiple = false, label, max }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [urlDraft, setUrlDraft] = useState("");
   const [busy, setBusy] = useState(false);
