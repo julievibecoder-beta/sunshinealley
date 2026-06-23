@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, Package, Tags, FileSpreadsheet, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Package, Tags, FileSpreadsheet, LogOut, ExternalLink, Home } from "lucide-react";
 import { useAuth, logout } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin")({
@@ -39,6 +39,7 @@ function AdminLayout() {
 
   const navItems = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { to: "/admin/home", label: "Home content", icon: Home, exact: false },
     { to: "/admin/products", label: "Products", icon: Package, exact: false },
     { to: "/admin/categories", label: "Categories", icon: Tags, exact: false },
     { to: "/admin/data", label: "Import / Export", icon: FileSpreadsheet, exact: false },
