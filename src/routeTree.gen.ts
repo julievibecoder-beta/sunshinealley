@@ -20,8 +20,11 @@ import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminHomeRouteImport } from './routes/admin.home'
+import { Route as AdminHeritageRouteImport } from './routes/admin.heritage'
 import { Route as AdminDataRouteImport } from './routes/admin.data'
+import { Route as AdminContactRouteImport } from './routes/admin.contact'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminAboutRouteImport } from './routes/admin.about'
 
 const HeritageRoute = HeritageRouteImport.update({
   id: '/heritage',
@@ -78,14 +81,29 @@ const AdminHomeRoute = AdminHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHeritageRoute = AdminHeritageRouteImport.update({
+  id: '/heritage',
+  path: '/heritage',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDataRoute = AdminDataRouteImport.update({
   id: '/data',
   path: '/data',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminContactRoute = AdminContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAboutRoute = AdminAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -95,8 +113,11 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/heritage': typeof HeritageRoute
+  '/admin/about': typeof AdminAboutRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/contact': typeof AdminContactRoute
   '/admin/data': typeof AdminDataRoute
+  '/admin/heritage': typeof AdminHeritageRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
@@ -109,8 +130,11 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/heritage': typeof HeritageRoute
+  '/admin/about': typeof AdminAboutRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/contact': typeof AdminContactRoute
   '/admin/data': typeof AdminDataRoute
+  '/admin/heritage': typeof AdminHeritageRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
@@ -125,8 +149,11 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/heritage': typeof HeritageRoute
+  '/admin/about': typeof AdminAboutRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/contact': typeof AdminContactRoute
   '/admin/data': typeof AdminDataRoute
+  '/admin/heritage': typeof AdminHeritageRoute
   '/admin/home': typeof AdminHomeRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/products': typeof AdminProductsRoute
@@ -142,8 +169,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/heritage'
+    | '/admin/about'
     | '/admin/categories'
+    | '/admin/contact'
     | '/admin/data'
+    | '/admin/heritage'
     | '/admin/home'
     | '/admin/login'
     | '/admin/products'
@@ -156,8 +186,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/heritage'
+    | '/admin/about'
     | '/admin/categories'
+    | '/admin/contact'
     | '/admin/data'
+    | '/admin/heritage'
     | '/admin/home'
     | '/admin/login'
     | '/admin/products'
@@ -171,8 +204,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/heritage'
+    | '/admin/about'
     | '/admin/categories'
+    | '/admin/contact'
     | '/admin/data'
+    | '/admin/heritage'
     | '/admin/home'
     | '/admin/login'
     | '/admin/products'
@@ -270,11 +306,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHomeRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/heritage': {
+      id: '/admin/heritage'
+      path: '/heritage'
+      fullPath: '/admin/heritage'
+      preLoaderRoute: typeof AdminHeritageRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/data': {
       id: '/admin/data'
       path: '/data'
       fullPath: '/admin/data'
       preLoaderRoute: typeof AdminDataRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contact': {
+      id: '/admin/contact'
+      path: '/contact'
+      fullPath: '/admin/contact'
+      preLoaderRoute: typeof AdminContactRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories': {
@@ -284,12 +334,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/about': {
+      id: '/admin/about'
+      path: '/about'
+      fullPath: '/admin/about'
+      preLoaderRoute: typeof AdminAboutRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAboutRoute: typeof AdminAboutRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminContactRoute: typeof AdminContactRoute
   AdminDataRoute: typeof AdminDataRoute
+  AdminHeritageRoute: typeof AdminHeritageRoute
   AdminHomeRoute: typeof AdminHomeRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -297,8 +357,11 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAboutRoute: AdminAboutRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminContactRoute: AdminContactRoute,
   AdminDataRoute: AdminDataRoute,
+  AdminHeritageRoute: AdminHeritageRoute,
   AdminHomeRoute: AdminHomeRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminProductsRoute: AdminProductsRoute,
