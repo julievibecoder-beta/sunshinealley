@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Package, Tags, FileSpreadsheet, RotateCcw } from "lucide-react";
+import { Package, Tags, FileSpreadsheet, RotateCcw, Home } from "lucide-react";
 import { useProducts, useCategories, resetStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/")({
@@ -21,6 +21,7 @@ function AdminHome() {
   ];
 
   const tiles = [
+    { to: "/admin/home", icon: Home, title: "Home content", desc: "Edit hero, sections, testimonials." },
     { to: "/admin/products", icon: Package, title: "Products", desc: "Add, edit, or unpublish pieces." },
     { to: "/admin/categories", icon: Tags, title: "Categories", desc: "Manage categories & subcategories." },
     { to: "/admin/data", icon: FileSpreadsheet, title: "Import / Export", desc: "Move catalogue via Excel." },
@@ -40,7 +41,7 @@ function AdminHome() {
         ))}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((t) => (
           <Link
             key={t.to}

@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Shield, Users, MessageCircle, ArrowRight } from "lucide-react";
+import { Shield, MessageCircle, Users, Leaf, Star, ArrowRight, Quote } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { useProducts, useCategories } from "@/lib/store";
 import { slugify } from "@/lib/store";
+import { useSiteContent } from "@/lib/site-content";
+import type { TrustItem } from "@/lib/site-content";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,46 +20,53 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const trustIconMap: Record<TrustItem["icon"], typeof Shield> = {
+  shield: Shield,
+  message: MessageCircle,
+  users: Users,
+  leaf: Leaf,
+  star: Star,
+};
+
 function Home() {
   const products = useProducts();
   const categories = useCategories();
+  const content = useSiteContent();
   const featured = products.filter((p) => p.featured).slice(0, 8);
 
   return (
     <SiteShell>
       {/* Hero */}
       <section className="relative h-[90vh] min-h-[520px] w-full overflow-hidden">
-        <img
-          src="https://picsum.photos/seed/kashmir1/1600/900"
-          alt="Kashmir Valley landscape"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {content.hero.image && (
+          <img
+            src={content.hero.image}
+            alt="Kashmir Valley landscape"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
         <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.45)" }} />
         <div className="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-center px-4 text-center text-white">
-          <span className="text-xs uppercase tracking-[0.3em] text-white/85">
-            Handcrafted in the Valley of Kashmir
-          </span>
+          <span className="text-xs uppercase tracking-[0.3em] text-white/85">{content.hero.eyebrow}</span>
           <h1 className="mt-4 font-display text-3xl font-semibold leading-tight md:text-5xl lg:text-6xl text-balance">
-            Woven in Kashmir,
+            {content.hero.titleLine1}
             <br />
-            Cherished Worldwide
+            {content.hero.titleLine2}
           </h1>
-          <p className="mt-5 max-w-2xl text-base text-white/85 md:text-lg">
-            Authentic Kashmiri handicrafts — carpets, shawls, paper maché, and more — crafted by generations of master artisans.
-          </p>
+          <p className="mt-5 max-w-2xl text-base text-white/85 md:text-lg">{content.hero.subtitle}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               to="/shop"
               className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-warm hover:bg-primary-dark"
               style={{ background: "var(--primary)" }}
             >
-              Explore the Shop <ArrowRight className="h-4 w-4" />
+              {content.hero.primaryCtaLabel} <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/about"
               className="inline-flex items-center gap-2 rounded-md border border-white/80 px-6 py-3 text-sm font-medium text-white backdrop-blur hover:bg-white hover:text-foreground"
             >
-              Our Story
+              {content.hero.secondaryCtaLabel}
             </Link>
           </div>
         </div>
@@ -66,8 +75,8 @@ function Home() {
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
         <div className="mb-10 text-center">
-          <h2 className="font-display text-3xl font-semibold md:text-4xl">Shop by Category</h2>
-          <p className="mt-2 text-muted-foreground">Explore Kashmir's living craft traditions.</p>
+          <h2 className="font-display text-3xl font-semibold md:text-4xl">{content.categoriesSection.title}</h2>
+          <p className="mt-2 text-muted-foreground">{content.categoriesSection.subtitle}</p>
         </div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {categories.map((cat) => (
@@ -104,10 +113,8 @@ function Home() {
       <section className="bg-card">
         <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
           <div className="mb-10 text-center">
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">Featured Pieces</h2>
-            <p className="mt-2 text-muted-foreground">
-              Each item tells a story of Kashmir's living craft tradition.
-            </p>
+            <h2 className="font-display text-3xl font-semibold md:text-4xl">{content.featuredSection.title}</h2>
+            <p className="mt-2 text-muted-foreground">{content.featuredSection.subtitle}</p>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((p) => (
@@ -129,55 +136,109 @@ function Home() {
       <section className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
         <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
           <div className="order-1 md:order-1">
-            <span className="text-xs uppercase tracking-[0.25em] text-primary">Heritage</span>
-            <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">500 Years of Living Craft</h2>
-            <p className="mt-4 leading-relaxed text-foreground/85">
-              Kashmir's handicraft tradition was kindled in the 1400s when Sultan Zain-ul-Abidin invited Persian masters to the Valley. Under the Mughals, Pashmina shawls became diplomatic gifts to European courts, and the paisley motif — born here — would later travel along the Silk Road into legend.
-            </p>
-            <p className="mt-3 leading-relaxed text-foreground/85">
-              From hand-knotted silk carpets to lacquered paper maché and walnut wood lattices, every piece is the latest chapter in a five-century story still being written by hand.
-            </p>
+            <span className="text-xs uppercase tracking-[0.25em] text-primary">{content.heritage.eyebrow}</span>
+            <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{content.heritage.title}</h2>
+            <p className="mt-4 leading-relaxed text-foreground/85">{content.heritage.body1}</p>
+            <p className="mt-3 leading-relaxed text-foreground/85">{content.heritage.body2}</p>
             <Link
               to="/heritage"
               className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-dark"
             >
-              Explore the full history <ArrowRight className="h-4 w-4" />
+              {content.heritage.ctaLabel} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="order-0 md:order-2">
-            <img
-              src="https://picsum.photos/seed/kashmirhistory/800/600"
-              alt="Kashmir heritage craft"
-              loading="lazy"
-              className="aspect-[4/3] w-full rounded-2xl object-cover shadow-warm"
-            />
+            {content.heritage.image && (
+              <img
+                src={content.heritage.image}
+                alt="Kashmir heritage craft"
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-2xl object-cover shadow-warm"
+              />
+            )}
           </div>
         </div>
       </section>
 
       {/* Trust bar */}
       <section className="border-y bg-card">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:grid-cols-3 md:px-6">
-          {[
-            { icon: Shield, title: "100% Authentic", text: "Directly sourced from Kashmir's master craftsmen" },
-            { icon: MessageCircle, title: "WhatsApp Enquiries", text: "Get pricing and availability instantly" },
-            { icon: Users, title: "Made to Order", text: "Custom sizes and designs available" },
-          ].map((item) => (
-            <div key={item.title} className="flex items-start gap-4">
-              <div
-                className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
-                style={{ background: "var(--primary-light)", color: "var(--primary-dark)" }}
-              >
-                <item.icon className="h-5 w-5" />
+        <div
+          className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 md:px-6"
+          style={{ gridTemplateColumns: `repeat(${Math.min(content.trust.length || 1, 3)}, minmax(0, 1fr))` }}
+        >
+          {content.trust.map((item) => {
+            const Icon = trustIconMap[item.icon] ?? Shield;
+            return (
+              <div key={item.id} className="flex items-start gap-4">
+                <div
+                  className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
+                  style={{ background: "var(--primary-light)", color: "var(--primary-dark)" }}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-semibold">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.text}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-display text-lg font-semibold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.text}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
+
+      {/* Customer Testimonials */}
+      {content.testimonials.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 md:px-6 md:py-24">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-3xl font-semibold md:text-4xl">{content.testimonialsSection.title}</h2>
+            <p className="mt-2 text-muted-foreground">{content.testimonialsSection.subtitle}</p>
+          </div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {content.testimonials.map((t) => (
+              <figure
+                key={t.id}
+                className="relative flex h-full flex-col rounded-2xl border bg-card p-6 shadow-soft"
+              >
+                <Quote className="absolute right-5 top-5 h-6 w-6 text-primary/20" />
+                <div className="flex gap-0.5 text-primary">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4"
+                      fill={i < t.rating ? "currentColor" : "none"}
+                      strokeWidth={1.5}
+                    />
+                  ))}
+                </div>
+                <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground/85">
+                  “{t.quote}”
+                </blockquote>
+                <figcaption className="mt-5 flex items-center gap-3 border-t pt-4">
+                  {t.image ? (
+                    <img
+                      src={t.image}
+                      alt={t.name}
+                      loading="lazy"
+                      className="h-10 w-10 flex-none rounded-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold"
+                      style={{ background: "var(--primary-light)", color: "var(--primary-dark)" }}
+                    >
+                      {t.name.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-semibold">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.location}</p>
+                  </div>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
     </SiteShell>
   );
 }
