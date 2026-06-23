@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Package, Tags, FileSpreadsheet, RotateCcw, Home } from "lucide-react";
+import { Package, Tags, FileSpreadsheet, RotateCcw, Home, BookOpen, Info, Mail } from "lucide-react";
 import { useProducts, useCategories, resetStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/")({
@@ -22,6 +22,9 @@ function AdminHome() {
 
   const tiles = [
     { to: "/admin/home", icon: Home, title: "Home content", desc: "Edit hero, sections, testimonials." },
+    { to: "/admin/heritage", icon: BookOpen, title: "Heritage page", desc: "Timeline, spotlights, GI tags." },
+    { to: "/admin/about", icon: Info, title: "About page", desc: "Story, founder, reasons, values." },
+    { to: "/admin/contact", icon: Mail, title: "Contact page", desc: "Details, form, map, CTAs." },
     { to: "/admin/products", icon: Package, title: "Products", desc: "Add, edit, or unpublish pieces." },
     { to: "/admin/categories", icon: Tags, title: "Categories", desc: "Manage categories & subcategories." },
     { to: "/admin/data", icon: FileSpreadsheet, title: "Import / Export", desc: "Move catalogue via Excel." },
