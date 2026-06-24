@@ -7,6 +7,7 @@ import {
   type SiteContent,
   type ContactPage,
 } from "@/lib/site-content";
+import { SeoSection } from "@/components/admin/SeoSection";
 import {
   PageHeader,
   Section,
@@ -15,6 +16,7 @@ import {
   TextInput,
   TextArea,
 } from "@/components/admin/EditorUI";
+
 
 export const Route = createFileRoute("/admin/contact")({ component: AdminContact });
 
