@@ -13,7 +13,11 @@ export type SpotlightItem = { id: string; title: string; text: string };
 export type AboutIcon = "shield" | "users" | "truck" | "sparkles" | "heart" | "hand" | "leaf";
 export type AboutCard = { id: string; icon: AboutIcon; title: string; text: string };
 
+export type SeoMeta = { title: string; description: string; ogImage: string };
+
+
 export type HeritagePage = {
+  seo: SeoMeta;
   hero: { title: string; subtitle: string; image: string };
   timelineSection: { title: string };
   timeline: TimelineItem[];
@@ -23,7 +27,9 @@ export type HeritagePage = {
   quote: string;
 };
 
+
 export type AboutPage = {
+  seo: SeoMeta;
   story: {
     eyebrow: string;
     title: string;
@@ -41,7 +47,9 @@ export type AboutPage = {
 };
 
 export type ContactPage = {
+  seo: SeoMeta;
   header: { title: string; subtitle: string };
+
   details: {
     sectionTitle: string;
     phoneLabel: string;
@@ -150,7 +158,13 @@ export const defaultSiteContent: SiteContent = {
     },
   ],
   heritagePage: {
+    seo: {
+      title: "Heritage — 500 Years of Kashmiri Craft",
+      description: "From Mughal-era Pashmina to paper maché, explore 500 years of Kashmiri craft heritage and the techniques still alive today.",
+      ogImage: "https://picsum.photos/seed/kashmirheritage/1600/700",
+    },
     hero: {
+
       title: "500 Years of Living Craft",
       subtitle: "A story that began in the courts of the Sultans and continues in workshops across the Valley.",
       image: "https://picsum.photos/seed/kashmirheritage/1600/700",
@@ -181,7 +195,13 @@ export const defaultSiteContent: SiteContent = {
     quote: "A Kashmiri carpet is not made — it is grown, thread by thread, year by year, in the hands of a family.",
   },
   aboutPage: {
+    seo: {
+      title: "About — Kashmir Crafts",
+      description: "Kashmir Crafts connects the world with authentic handicrafts of the Kashmir Valley — directly from master artisans.",
+      ogImage: "https://picsum.photos/seed/kashmir-shop/1200/630",
+    },
     story: {
+
       eyebrow: "Our Story",
       title: "A shop with the Valley in its bones",
       body1:
@@ -208,7 +228,13 @@ export const defaultSiteContent: SiteContent = {
     ],
   },
   contactPage: {
+    seo: {
+      title: "Contact — Kashmir Crafts",
+      description: "Get in touch with Kashmir Crafts. WhatsApp, phone, email, or visit our shop in Lal Chowk, Srinagar.",
+      ogImage: "",
+    },
     header: { title: "Get in Touch", subtitle: "We'd love to hear from you. Most customers reach us on WhatsApp." },
+
     details: {
       sectionTitle: "Reach us directly",
       phoneLabel: "Phone",
@@ -250,20 +276,27 @@ function read(): SiteContent {
       return {
         ...defaultSiteContent,
         ...parsed,
-        heritagePage: { ...defaultSiteContent.heritagePage, ...(parsed.heritagePage ?? {}) },
+        heritagePage: {
+          ...defaultSiteContent.heritagePage,
+          ...(parsed.heritagePage ?? {}),
+          seo: { ...defaultSiteContent.heritagePage.seo, ...((parsed.heritagePage ?? {}).seo ?? {}) },
+        },
         aboutPage: {
           ...defaultSiteContent.aboutPage,
           ...(parsed.aboutPage ?? {}),
+          seo: { ...defaultSiteContent.aboutPage.seo, ...((parsed.aboutPage ?? {}).seo ?? {}) },
           story: { ...defaultSiteContent.aboutPage.story, ...((parsed.aboutPage ?? {}).story ?? {}) },
         },
         contactPage: {
           ...defaultSiteContent.contactPage,
           ...(parsed.contactPage ?? {}),
+          seo: { ...defaultSiteContent.contactPage.seo, ...((parsed.contactPage ?? {}).seo ?? {}) },
           header: { ...defaultSiteContent.contactPage.header, ...((parsed.contactPage ?? {}).header ?? {}) },
           details: { ...defaultSiteContent.contactPage.details, ...((parsed.contactPage ?? {}).details ?? {}) },
           form: { ...defaultSiteContent.contactPage.form, ...((parsed.contactPage ?? {}).form ?? {}) },
           footerCta: { ...defaultSiteContent.contactPage.footerCta, ...((parsed.contactPage ?? {}).footerCta ?? {}) },
         },
+
       } as SiteContent;
     }
   } catch {

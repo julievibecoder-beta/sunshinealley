@@ -1,19 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/site/SiteShell";
-import { useSiteContent } from "@/lib/site-content";
+import { loadSiteContent, useSiteContent } from "@/lib/site-content";
 import { aboutIconMap } from "@/lib/about-icons";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About — Kashmir Crafts" },
-      { name: "description", content: "Kashmir Crafts connects the world with authentic handicrafts of the Kashmir Valley — directly from master artisans." },
-      { property: "og:title", content: "About Kashmir Crafts" },
-      { property: "og:description", content: "Our story, our values, and the artisans who make it possible." },
-    ],
-  }),
+  head: () => {
+    const s = loadSiteContent().aboutPage.seo;
+    return {
+      meta: [
+        { title: s.title },
+        { name: "description", content: s.description },
+        { property: "og:title", content: s.title },
+        { property: "og:description", content: s.description },
+        ...(s.ogImage ? [{ property: "og:image" as const, content: s.ogImage }] : []),
+      ],
+    };
+  },
   component: About,
 });
+
 
 function About() {
   const p = useSiteContent().aboutPage;

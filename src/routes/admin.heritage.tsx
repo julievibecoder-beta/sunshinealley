@@ -9,6 +9,7 @@ import {
   type HeritagePage,
 } from "@/lib/site-content";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { SeoSection } from "@/components/admin/SeoSection";
 import {
   PageHeader,
   Section,
@@ -18,6 +19,7 @@ import {
   TextArea,
   CardRow,
 } from "@/components/admin/EditorUI";
+
 
 export const Route = createFileRoute("/admin/heritage")({ component: AdminHeritage });
 
@@ -52,6 +54,10 @@ function AdminHeritage() {
           }
         }}
       />
+
+      <SeoSection value={p.seo} onChange={(seo) => setP({ seo })} />
+
+
 
       <Section title="Hero">
         <Field label="Hero image">
