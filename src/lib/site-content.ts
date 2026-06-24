@@ -228,7 +228,13 @@ export const defaultSiteContent: SiteContent = {
     ],
   },
   contactPage: {
+    seo: {
+      title: "Contact — Kashmir Crafts",
+      description: "Get in touch with Kashmir Crafts. WhatsApp, phone, email, or visit our shop in Lal Chowk, Srinagar.",
+      ogImage: "",
+    },
     header: { title: "Get in Touch", subtitle: "We'd love to hear from you. Most customers reach us on WhatsApp." },
+
     details: {
       sectionTitle: "Reach us directly",
       phoneLabel: "Phone",
