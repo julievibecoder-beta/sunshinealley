@@ -195,7 +195,13 @@ export const defaultSiteContent: SiteContent = {
     quote: "A Kashmiri carpet is not made — it is grown, thread by thread, year by year, in the hands of a family.",
   },
   aboutPage: {
+    seo: {
+      title: "About — Kashmir Crafts",
+      description: "Kashmir Crafts connects the world with authentic handicrafts of the Kashmir Valley — directly from master artisans.",
+      ogImage: "https://picsum.photos/seed/kashmir-shop/1200/630",
+    },
     story: {
+
       eyebrow: "Our Story",
       title: "A shop with the Valley in its bones",
       body1:
