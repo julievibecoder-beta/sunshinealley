@@ -55,6 +55,10 @@ function AdminHeritage() {
         }}
       />
 
+      <SeoSection value={p.seo} onChange={(seo) => setP({ seo })} />
+
+
+
       <Section title="Hero">
         <Field label="Hero image">
           <ImageUpload
