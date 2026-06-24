@@ -29,6 +29,7 @@ export type HeritagePage = {
 
 
 export type AboutPage = {
+  seo: SeoMeta;
   story: {
     eyebrow: string;
     title: string;
@@ -46,7 +47,9 @@ export type AboutPage = {
 };
 
 export type ContactPage = {
+  seo: SeoMeta;
   header: { title: string; subtitle: string };
+
   details: {
     sectionTitle: string;
     phoneLabel: string;
