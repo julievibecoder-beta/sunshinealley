@@ -1,20 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "@/components/site/SiteShell";
 import { PageHero } from "@/components/site/PageHero";
-import { useSiteContent } from "@/lib/site-content";
+import { loadSiteContent, useSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/heritage")({
-  head: () => ({
-    meta: [
-      { title: "Heritage — 500 Years of Kashmiri Craft" },
-      { name: "description", content: "From Mughal-era Pashmina to paper maché, explore 500 years of Kashmiri craft heritage and the techniques still alive today." },
-      { property: "og:title", content: "500 Years of Kashmiri Craft Heritage" },
-      { property: "og:description", content: "From Mughal-era Pashmina to paper maché — the living history of Kashmir's crafts." },
-      { property: "og:image", content: "https://picsum.photos/seed/kashmirheritage/1600/700" },
-    ],
-  }),
+  head: () => {
+    const s = loadSiteContent().heritagePage.seo;
+    return {
+      meta: [
+        { title: s.title },
+        { name: "description", content: s.description },
+        { property: "og:title", content: s.title },
+        { property: "og:description", content: s.description },
+        ...(s.ogImage ? [{ property: "og:image" as const, content: s.ogImage }] : []),
+      ],
+    };
+  },
   component: Heritage,
 });
+
 
 function Heritage() {
   const p = useSiteContent().heritagePage;
