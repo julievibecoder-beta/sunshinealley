@@ -12,6 +12,7 @@ import {
 } from "@/lib/site-content";
 import { aboutIconOptions } from "@/lib/about-icons";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { SeoSection } from "@/components/admin/SeoSection";
 import {
   PageHeader,
   Section,
@@ -21,6 +22,7 @@ import {
   TextArea,
   CardRow,
 } from "@/components/admin/EditorUI";
+
 
 export const Route = createFileRoute("/admin/about")({ component: AdminAbout });
 
