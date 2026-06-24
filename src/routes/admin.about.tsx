@@ -94,7 +94,10 @@ function AdminAbout() {
         }}
       />
 
+      <SeoSection value={p.seo} onChange={(seo) => setP({ seo })} />
+
       <Section title="Story">
+
         <Grid2>
           <Field label="Eyebrow">
             <TextInput value={p.story.eyebrow} onChange={(v) => setP({ story: { ...p.story, eyebrow: v } })} />
