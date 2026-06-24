@@ -158,7 +158,13 @@ export const defaultSiteContent: SiteContent = {
     },
   ],
   heritagePage: {
+    seo: {
+      title: "Heritage — 500 Years of Kashmiri Craft",
+      description: "From Mughal-era Pashmina to paper maché, explore 500 years of Kashmiri craft heritage and the techniques still alive today.",
+      ogImage: "https://picsum.photos/seed/kashmirheritage/1600/700",
+    },
     hero: {
+
       title: "500 Years of Living Craft",
       subtitle: "A story that began in the courts of the Sultans and continues in workshops across the Valley.",
       image: "https://picsum.photos/seed/kashmirheritage/1600/700",
