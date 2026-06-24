@@ -13,6 +13,9 @@ export type SpotlightItem = { id: string; title: string; text: string };
 export type AboutIcon = "shield" | "users" | "truck" | "sparkles" | "heart" | "hand" | "leaf";
 export type AboutCard = { id: string; icon: AboutIcon; title: string; text: string };
 
+export type SeoMeta = { title: string; description: string; ogImage: string };
+
+
 export type HeritagePage = {
   hero: { title: string; subtitle: string; image: string };
   timelineSection: { title: string };
