@@ -276,20 +276,27 @@ function read(): SiteContent {
       return {
         ...defaultSiteContent,
         ...parsed,
-        heritagePage: { ...defaultSiteContent.heritagePage, ...(parsed.heritagePage ?? {}) },
+        heritagePage: {
+          ...defaultSiteContent.heritagePage,
+          ...(parsed.heritagePage ?? {}),
+          seo: { ...defaultSiteContent.heritagePage.seo, ...((parsed.heritagePage ?? {}).seo ?? {}) },
+        },
         aboutPage: {
           ...defaultSiteContent.aboutPage,
           ...(parsed.aboutPage ?? {}),
+          seo: { ...defaultSiteContent.aboutPage.seo, ...((parsed.aboutPage ?? {}).seo ?? {}) },
           story: { ...defaultSiteContent.aboutPage.story, ...((parsed.aboutPage ?? {}).story ?? {}) },
         },
         contactPage: {
           ...defaultSiteContent.contactPage,
           ...(parsed.contactPage ?? {}),
+          seo: { ...defaultSiteContent.contactPage.seo, ...((parsed.contactPage ?? {}).seo ?? {}) },
           header: { ...defaultSiteContent.contactPage.header, ...((parsed.contactPage ?? {}).header ?? {}) },
           details: { ...defaultSiteContent.contactPage.details, ...((parsed.contactPage ?? {}).details ?? {}) },
           form: { ...defaultSiteContent.contactPage.form, ...((parsed.contactPage ?? {}).form ?? {}) },
           footerCta: { ...defaultSiteContent.contactPage.footerCta, ...((parsed.contactPage ?? {}).footerCta ?? {}) },
         },
+
       } as SiteContent;
     }
   } catch {
