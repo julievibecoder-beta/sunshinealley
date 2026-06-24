@@ -17,6 +17,7 @@ export type SeoMeta = { title: string; description: string; ogImage: string };
 
 
 export type HeritagePage = {
+  seo: SeoMeta;
   hero: { title: string; subtitle: string; image: string };
   timelineSection: { title: string };
   timeline: TimelineItem[];
@@ -25,6 +26,7 @@ export type HeritagePage = {
   gi: { eyebrow: string; title: string; body: string; tags: string[] };
   quote: string;
 };
+
 
 export type AboutPage = {
   story: {
