@@ -4,19 +4,24 @@ import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { WhatsAppCTA } from "@/components/site/WhatsAppButton";
 import { PHONE_TEL, getWhatsAppLink } from "@/lib/whatsapp";
-import { useSiteContent } from "@/lib/site-content";
+import { loadSiteContent, useSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact — Kashmir Crafts" },
-      { name: "description", content: "Get in touch with Kashmir Crafts. WhatsApp, phone, email, or visit our shop in Lal Chowk, Srinagar." },
-      { property: "og:title", content: "Contact Kashmir Crafts" },
-      { property: "og:description", content: "Reach us on WhatsApp, phone or email — or visit us in Srinagar." },
-    ],
-  }),
+  head: () => {
+    const s = loadSiteContent().contactPage.seo;
+    return {
+      meta: [
+        { title: s.title },
+        { name: "description", content: s.description },
+        { property: "og:title", content: s.title },
+        { property: "og:description", content: s.description },
+        ...(s.ogImage ? [{ property: "og:image" as const, content: s.ogImage }] : []),
+      ],
+    };
+  },
   component: Contact,
 });
+
 
 function Contact() {
   const p = useSiteContent().contactPage;
