@@ -52,7 +52,10 @@ function AdminContact() {
         }}
       />
 
+      <SeoSection value={p.seo} onChange={(seo) => setP({ seo })} />
+
       <Section title="Header">
+
         <Field label="Title">
           <TextInput value={p.header.title} onChange={(v) => setP({ header: { ...p.header, title: v } })} />
         </Field>
