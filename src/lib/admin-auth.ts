@@ -1,44 +1,48 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { adminLogin, adminLogout, adminMe } from "./admin.functions";
 
-const SESSION_KEY = "kc_admin_session_v1";
-const AUTH_EVENT = "kc-auth-change";
+const KEY = ["admin-me"] as const;
 
-// Hardcoded master admin credentials.
-export const ADMIN_USERNAME = "admin";
-export const ADMIN_PASSWORD = "kashmir2026";
-
-const isClient = typeof window !== "undefined";
-
-export function isAuthed(): boolean {
-  if (!isClient) return false;
-  return localStorage.getItem(SESSION_KEY) === "1";
+export function useAuth(): { ready: boolean; authed: boolean; username: string | null } {
+  const { data, isFetched } = useQuery({
+    queryKey: KEY,
+    queryFn: () => adminMe(),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+  return {
+    ready: isFetched,
+    authed: !!data?.username,
+    username: data?.username ?? null,
+  };
 }
 
-export function login(username: string, password: string): boolean {
-  if (username.trim() === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    localStorage.setItem(SESSION_KEY, "1");
-    window.dispatchEvent(new Event(AUTH_EVENT));
-    return true;
-  }
-  return false;
+export function useLogin() {
+  const qc = useQueryClient();
+  return async (username: string, password: string) => {
+    const res = await adminLogin({ data: { username, password } });
+    if (res.ok) {
+      await qc.invalidateQueries({ queryKey: KEY });
+      return true;
+    }
+    return false;
+  };
 }
 
-export function logout() {
-  localStorage.removeItem(SESSION_KEY);
-  window.dispatchEvent(new Event(AUTH_EVENT));
+export function useLogout() {
+  const qc = useQueryClient();
+  return async () => {
+    await adminLogout();
+    await qc.invalidateQueries({ queryKey: KEY });
+  };
 }
 
-export function useAuth(): { ready: boolean; authed: boolean } {
-  const [state, setState] = useState({ ready: false, authed: false });
-  useEffect(() => {
-    setState({ ready: true, authed: isAuthed() });
-    const onChange = () => setState({ ready: true, authed: isAuthed() });
-    window.addEventListener(AUTH_EVENT, onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener(AUTH_EVENT, onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
-  return state;
+// Back-compat sync exports (no longer used after refactor, kept to avoid import breaks).
+export async function login(username: string, password: string): Promise<boolean> {
+  const res = await adminLogin({ data: { username, password } });
+  return res.ok;
+}
+export async function logout(): Promise<void> {
+  await adminLogout();
 }
