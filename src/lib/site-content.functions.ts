@@ -3,7 +3,8 @@ import { z } from "zod";
 import { defaultSiteContent, mergeSiteContent, type SiteContent } from "./site-content-defaults";
 
 export const getSiteContentFn = createServerFn({ method: "GET" }).handler(async (): Promise<SiteContent> => {
-  const { getSql, ensureSchema } = await import("./db.server");
+  const { getSql, ensureSchema, hasDatabaseUrl } = await import("./db.server");
+  if (!hasDatabaseUrl()) return defaultSiteContent;
   await ensureSchema();
   const sql = getSql();
   const rows = await sql<{ data: Partial<SiteContent> }[]>`SELECT data FROM site_content WHERE id = 'main' LIMIT 1`;

@@ -5,6 +5,10 @@ import { defaultSiteContent } from "./site-content-defaults";
 let sql: ReturnType<typeof postgres> | null = null;
 let schemaReady: Promise<void> | null = null;
 
+export function hasDatabaseUrl(): boolean {
+  return !!process.env.DATABASE_URL;
+}
+
 export function getSql() {
   if (!sql) {
     const url = process.env.DATABASE_URL;

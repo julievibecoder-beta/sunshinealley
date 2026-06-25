@@ -19,7 +19,11 @@ export type Product = {
 };
 
 export const getCatalogue = createServerFn({ method: "GET" }).handler(async () => {
-  const { getSql, ensureSchema } = await import("./db.server");
+  const { getSql, ensureSchema, hasDatabaseUrl } = await import("./db.server");
+  if (!hasDatabaseUrl()) {
+    const { categoriesSeed, products } = await import("@/data/products");
+    return { categories: categoriesSeed as CategoryDef[], products: products as Product[] };
+  }
   await ensureSchema();
   const sql = getSql();
   const cats = await sql<
