@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { LayoutDashboard, Package, Tags, FileSpreadsheet, LogOut, ExternalLink, Home, BookOpen, Info, Mail } from "lucide-react";
-import { useAuth, logout } from "@/lib/admin-auth";
+import { useAuth, useLogout } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminLayout() {
   const { ready, authed } = useAuth();
+  const logout = useLogout();
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isLoginRoute = pathname === "/admin/login";
@@ -63,8 +64,8 @@ function AdminLayout() {
               <ExternalLink className="h-4 w-4" /> View site
             </Link>
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 router.navigate({ to: "/admin/login" });
               }}
               className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:border-primary hover:text-primary"
