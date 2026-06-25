@@ -1,109 +1,104 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { categoriesSeed, products as seedProducts } from "@/data/products";
 import {
-  products as seedProducts,
-  categoriesSeed,
+  getCatalogue,
+  saveCategoriesFn,
+  saveProductsFn,
+  resetCatalogueFn,
   type Product,
   type CategoryDef,
-} from "@/data/products";
+} from "./catalogue.functions";
 
-const PRODUCTS_KEY = "kc_products_v1";
-const CATEGORIES_KEY = "kc_categories_v1";
-const CHANGE_EVENT = "kc-store-change";
+export type { Product, CategoryDef };
 
-const isClient = typeof window !== "undefined";
+const CATALOGUE_KEY = ["catalogue"] as const;
 
-function read<T>(key: string, fallback: T): T {
-  if (!isClient) return fallback;
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw) as T;
-  } catch {
-    /* ignore */
-  }
-  return fallback;
-}
+// Module-level cache so sync loaders (loadProducts/loadCategories) still work.
+let cache: { products: Product[]; categories: CategoryDef[] } = {
+  products: seedProducts,
+  categories: categoriesSeed,
+};
 
-function write<T>(key: string, value: T) {
-  if (!isClient) return;
-  localStorage.setItem(key, JSON.stringify(value));
-  window.dispatchEvent(new Event(CHANGE_EVENT));
+async function fetchCatalogue() {
+  const data = await getCatalogue();
+  cache = data;
+  return data;
 }
 
 export function loadProducts(): Product[] {
-  return read(PRODUCTS_KEY, seedProducts);
-}
-export function saveProducts(items: Product[]) {
-  write(PRODUCTS_KEY, items);
+  return cache.products;
 }
 export function loadCategories(): CategoryDef[] {
-  return read(CATEGORIES_KEY, categoriesSeed);
-}
-export function saveCategories(items: CategoryDef[]) {
-  write(CATEGORIES_KEY, items);
+  return cache.categories;
 }
 
-/**
- * Save categories AND cascade rename changes onto products so the
- * category/subcategory link is preserved when names are edited.
- *
- * categoryRenames : map of old category name -> new category name
- * subRenames      : map keyed by NEW category name, then old subcategory
- *                   name -> new subcategory name
- */
-export function saveCategoriesWithCascade(
-  items: CategoryDef[],
-  categoryRenames: Record<string, string> = {},
-  subRenames: Record<string, Record<string, string>> = {},
-) {
-  const products = loadProducts();
-  const updated = products.map((p) => {
-    let category = p.category;
-    let subcategory = p.subcategory;
-    if (categoryRenames[category]) category = categoryRenames[category];
-    const subMap = subRenames[category];
-    if (subMap && subcategory && subMap[subcategory]) {
-      subcategory = subMap[subcategory];
-    }
-    if (category === p.category && subcategory === p.subcategory) return p;
-    return { ...p, category, subcategory };
+function useCatalogue() {
+  return useQuery({
+    queryKey: CATALOGUE_KEY,
+    queryFn: fetchCatalogue,
+    initialData: cache,
+    staleTime: 30_000,
   });
-  saveProducts(updated);
-  saveCategories(items);
-}
-
-export function notifyStoreChange() {
-  if (!isClient) return;
-  window.dispatchEvent(new Event(CHANGE_EVENT));
-}
-
-export function resetStore() {
-  if (!isClient) return;
-  localStorage.removeItem(PRODUCTS_KEY);
-  localStorage.removeItem(CATEGORIES_KEY);
-  window.dispatchEvent(new Event(CHANGE_EVENT));
-}
-
-function useStore<T>(loader: () => T): T {
-  const [value, setValue] = useState<T>(loader);
-  useEffect(() => {
-    setValue(loader());
-    const onChange = () => setValue(loader());
-    window.addEventListener(CHANGE_EVENT, onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, onChange);
-      window.removeEventListener("storage", onChange);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return value;
 }
 
 export function useProducts(): Product[] {
-  return useStore(loadProducts);
+  const { data } = useCatalogue();
+  return useMemo(() => data?.products ?? cache.products, [data]);
 }
+
 export function useCategories(): CategoryDef[] {
-  return useStore(loadCategories);
+  const { data } = useCatalogue();
+  return useMemo(() => data?.categories ?? cache.categories, [data]);
+}
+
+// Helper to invalidate the catalogue query from any place that doesn't have access
+// to a queryClient. We push into the global window event so listeners can refresh.
+const REFRESH_EVENT = "kc-store-change";
+const isClient = typeof window !== "undefined";
+
+function broadcast() {
+  if (isClient) window.dispatchEvent(new Event(REFRESH_EVENT));
+}
+
+export function notifyStoreChange() {
+  broadcast();
+}
+
+export async function saveProducts(items: Product[]) {
+  await saveProductsFn({ data: { items } });
+  cache = { ...cache, products: items };
+  broadcast();
+}
+
+export async function saveCategories(items: CategoryDef[]) {
+  await saveCategoriesFn({ data: { items } });
+  cache = { ...cache, categories: items };
+  broadcast();
+}
+
+/**
+ * Server-side cascade: the server already keeps product->category/subcategory
+ * links via FK. The rename arguments are accepted for backwards compatibility
+ * but no client-side cascade is required.
+ */
+export async function saveCategoriesWithCascade(
+  items: CategoryDef[],
+  _categoryRenames: Record<string, string> = {},
+  _subRenames: Record<string, Record<string, string>> = {},
+) {
+  await saveCategoriesFn({ data: { items } });
+  // Refresh catalogue (server reflects FK changes onto product names).
+  const fresh = await fetchCatalogue();
+  cache = fresh;
+  broadcast();
+}
+
+export async function resetStore() {
+  await resetCatalogueFn();
+  const fresh = await fetchCatalogue();
+  cache = fresh;
+  broadcast();
 }
 
 export function slugify(name: string): string {
@@ -114,4 +109,20 @@ export function slugify(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export type { Product, CategoryDef };
+// Bridge: when broadcast fires, invalidate the catalogue query so any mounted
+// hook re-renders with fresh data.
+export function useStoreRefreshBridge() {
+  const qc = useQueryClient();
+  if (isClient) {
+    // Re-attaching the same listener each render is cheap and idempotent (named function).
+    window.removeEventListener(REFRESH_EVENT, _bridgeHandler as EventListener);
+    (_bridgeHandler as unknown as { __qc?: typeof qc }).__qc = qc;
+    window.addEventListener(REFRESH_EVENT, _bridgeHandler as EventListener);
+  }
+  return null;
+}
+
+function _bridgeHandler() {
+  const qc = (_bridgeHandler as unknown as { __qc?: ReturnType<typeof useQueryClient> }).__qc;
+  if (qc) qc.invalidateQueries({ queryKey: CATALOGUE_KEY });
+}

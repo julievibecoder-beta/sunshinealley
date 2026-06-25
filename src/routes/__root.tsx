@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { useStoreRefreshBridge } from "../lib/store";
+import { useSiteContentRefreshBridge } from "../lib/site-content";
 
 function NotFoundComponent() {
   return (
@@ -121,8 +123,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <RefreshBridges />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
 }
+
+function RefreshBridges() {
+  // Mount listeners that invalidate React Query caches when our app dispatches
+  // 'kc-store-change' (after writes via save* helpers).
+  useStoreRefreshBridge();
+  useSiteContentRefreshBridge();
+  return null;
+}
+

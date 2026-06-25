@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock } from "lucide-react";
-import { login } from "@/lib/admin-auth";
+import { useLogin } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLogin,
@@ -9,18 +9,30 @@ export const Route = createFileRoute("/admin/login")({
 
 function AdminLogin() {
   const router = useRouter();
+  const login = useLogin();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(username, password)) {
-      router.navigate({ to: "/admin" });
-    } else {
-      setError("Invalid username or password.");
+    setBusy(true);
+    setError(null);
+    try {
+      const ok = await login(username, password);
+      if (ok) {
+        router.navigate({ to: "/admin" });
+      } else {
+        setError("Invalid username or password.");
+      }
+    } catch {
+      setError("Sign-in failed. Please try again.");
+    } finally {
+      setBusy(false);
     }
   };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
@@ -60,12 +72,14 @@ function AdminLogin() {
 
         <button
           type="submit"
-          className="mt-6 w-full rounded-md px-4 py-2.5 text-sm font-medium text-primary-foreground"
+          disabled={busy}
+          className="mt-6 w-full rounded-md px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
           style={{ background: "var(--primary)" }}
         >
-          Sign in
+          {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
     </div>
   );
 }
+
