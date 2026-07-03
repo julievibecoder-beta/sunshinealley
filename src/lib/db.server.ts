@@ -13,14 +13,34 @@ export function getSql() {
   if (!sql) {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error("DATABASE_URL is not configured");
-    sql = postgres(url, {
-      ssl: "prefer",
+    // Parse manually to avoid postgres.js "Invalid URL string." on Workers
+    // when the raw connection string contains reserved chars in the password.
+    const parsed = parseConnectionString(url);
+    sql = postgres({
+      host: parsed.host,
+      port: parsed.port,
+      database: parsed.database,
+      username: parsed.username,
+      password: parsed.password,
+      ssl: "require",
       max: 3,
       idle_timeout: 20,
       prepare: false,
     });
   }
   return sql;
+}
+
+function parseConnectionString(raw: string) {
+  const m = raw.match(/^postgres(?:ql)?:\/\/([^:]+):([^@]*)@([^:/?]+)(?::(\d+))?\/([^?]+)/);
+  if (!m) throw new Error("DATABASE_URL is not a valid postgres URL");
+  return {
+    username: decodeURIComponent(m[1]),
+    password: decodeURIComponent(m[2]),
+    host: decodeURIComponent(m[3]),
+    port: m[4] ? Number(m[4]) : 5432,
+    database: decodeURIComponent(m[5]),
+  };
 }
 
 export async function ensureSchema() {
