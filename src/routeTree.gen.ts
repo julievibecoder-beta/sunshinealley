@@ -25,6 +25,7 @@ import { Route as AdminDataRouteImport } from './routes/admin.data'
 import { Route as AdminContactRouteImport } from './routes/admin.contact'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminAboutRouteImport } from './routes/admin.about'
+import { Route as ApiPublicDbHealthRouteImport } from './routes/api/public/db-health'
 
 const HeritageRoute = HeritageRouteImport.update({
   id: '/heritage',
@@ -106,6 +107,11 @@ const AdminAboutRoute = AdminAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicDbHealthRoute = ApiPublicDbHealthRouteImport.update({
+  id: '/api/public/db-health',
+  path: '/api/public/db-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/api/public/db-health': typeof ApiPublicDbHealthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/shop/$slug': typeof ShopSlugRoute
   '/admin': typeof AdminIndexRoute
   '/shop': typeof ShopIndexRoute
+  '/api/public/db-health': typeof ApiPublicDbHealthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/shop/$slug': typeof ShopSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/api/public/db-health': typeof ApiPublicDbHealthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/shop/$slug'
     | '/admin/'
     | '/shop/'
+    | '/api/public/db-health'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/shop/$slug'
     | '/admin'
     | '/shop'
+    | '/api/public/db-health'
   id:
     | '__root__'
     | '/'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/shop/$slug'
     | '/admin/'
     | '/shop/'
+    | '/api/public/db-health'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   HeritageRoute: typeof HeritageRoute
   ShopSlugRoute: typeof ShopSlugRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ApiPublicDbHealthRoute: typeof ApiPublicDbHealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAboutRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/db-health': {
+      id: '/api/public/db-health'
+      path: '/api/public/db-health'
+      fullPath: '/api/public/db-health'
+      preLoaderRoute: typeof ApiPublicDbHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -378,6 +398,7 @@ const rootRouteChildren: RootRouteChildren = {
   HeritageRoute: HeritageRoute,
   ShopSlugRoute: ShopSlugRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ApiPublicDbHealthRoute: ApiPublicDbHealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
