@@ -20,13 +20,13 @@ export function useAuth(): { ready: boolean; authed: boolean; username: string |
 
 export function useLogin() {
   const qc = useQueryClient();
-  return async (username: string, password: string) => {
+  return async (username: string, password: string): Promise<{ ok: boolean; message?: string; code?: string }> => {
     const res = await adminLogin({ data: { username, password } });
     if (res.ok) {
       await qc.invalidateQueries({ queryKey: KEY });
-      return true;
+      return { ok: true };
     }
-    return false;
+    return { ok: false, message: (res as { message?: string }).message, code: (res as { code?: string }).code };
   };
 }
 
