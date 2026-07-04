@@ -20,14 +20,17 @@ function AdminLogin() {
     setBusy(true);
     setError(null);
     try {
-      const ok = await login(username, password);
-      if (ok) {
+      const res = await login(username, password);
+      if (res.ok) {
         router.navigate({ to: "/admin" });
       } else {
-        setError("Invalid username or password.");
+        console.warn("[admin login] failed:", res.code, res.message);
+        setError(res.message ?? "Invalid username or password.");
       }
-    } catch {
-      setError("Sign-in failed. Please try again.");
+    } catch (err) {
+      const e = err as Error;
+      console.error("[admin login] exception:", e);
+      setError(import.meta.env.DEV ? `${e.name}: ${e.message}` : "Sign-in failed. Please try again.");
     } finally {
       setBusy(false);
     }
