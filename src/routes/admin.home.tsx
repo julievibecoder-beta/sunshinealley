@@ -28,18 +28,35 @@ function AdminHomeContent() {
   const [draft, setDraft] = useState<SiteContent>(live);
   const [saved, setSaved] = useState(false);
 
+  // Sync the draft whenever the live (server) content changes, so the form
+  // shows the actual persisted values instead of just the initial cache.
   useEffect(() => {
     setDraft(live);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [live]);
+
 
   const update = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
-  const save = () => {
-    saveSiteContent(draft);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const save = async () => {
+    setSaveError(null);
+    try {
+      await saveSiteContent(draft);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e: unknown) {
+      const err = e as { message?: string; status?: number; response?: { status?: number } };
+      const status = err?.status ?? err?.response?.status;
+      const msg = err?.message || String(e);
+      const full = status ? `${status}: ${msg}` : msg;
+      console.error("[admin.home] saveSiteContent failed:", e);
+      setSaveError(
+        status === 401
+          ? "Not authorized — your admin session expired. Please log in again."
+          : `Save failed — ${full}`,
+      );
+    }
   };
 
   const addTrust = () => {
@@ -101,6 +118,12 @@ function AdminHomeContent() {
           </button>
         </div>
       </div>
+      {saveError && (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {saveError}
+        </div>
+      )}
+
 
       {/* HERO */}
       <Section title="Hero">
