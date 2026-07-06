@@ -114,6 +114,7 @@ function AdminHomeContent() {
           >
             <Save className="h-4 w-4" /> {saved ? "Saved!" : "Save changes"}
           </button>
+        </div>
       </div>
       {saveError && (
         <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
