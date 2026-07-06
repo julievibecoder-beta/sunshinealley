@@ -28,10 +28,12 @@ function AdminHomeContent() {
   const [draft, setDraft] = useState<SiteContent>(live);
   const [saved, setSaved] = useState(false);
 
+  // Sync the draft whenever the live (server) content changes, so the form
+  // shows the actual persisted values instead of just the initial cache.
   useEffect(() => {
     setDraft(live);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [live]);
+
 
   const update = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
