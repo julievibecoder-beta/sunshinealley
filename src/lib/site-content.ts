@@ -55,7 +55,7 @@ export function useSiteContent(): SiteContent {
   const { data } = useQuery({
     queryKey: KEY,
     queryFn: fetchSiteContent,
-    initialData: cache,
+    placeholderData: cache,
     staleTime: 30_000,
   });
   return data ?? cache;
@@ -66,14 +66,14 @@ function broadcast() {
 }
 
 export async function saveSiteContent(c: SiteContent) {
-  cache = c;
   await saveSiteContentFn({ data: { content: c } });
+  cache = await fetchSiteContent();
   broadcast();
 }
 
 export async function resetSiteContent() {
   await resetSiteContentFn();
-  cache = defaultSiteContent;
+  cache = await fetchSiteContent();
   broadcast();
 }
 
