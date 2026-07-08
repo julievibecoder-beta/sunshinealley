@@ -55,7 +55,7 @@ export function useSiteContent(): SiteContent {
   const { data } = useQuery({
     queryKey: KEY,
     queryFn: fetchSiteContent,
-    initialData: cache,
+    placeholderData: cache,
     staleTime: 30_000,
   });
   return data ?? cache;
