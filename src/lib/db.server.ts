@@ -32,14 +32,24 @@ export function getSql() {
 }
 
 function parseConnectionString(raw: string) {
-  const m = raw.match(/^postgres(?:ql)?:\/\/([^:]+):([^@]*)@([^:/?]+)(?::(\d+))?\/([^?]+)/);
-  if (!m) throw new Error("DATABASE_URL is not a valid postgres URL");
+  const normalized = raw.trim();
+  let parsed: URL;
+  try {
+    parsed = new URL(normalized);
+  } catch {
+    throw new Error("DATABASE_URL is not a valid postgres URL");
+  }
+
+  if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
+    throw new Error("DATABASE_URL must start with postgres:// or postgresql://");
+  }
+
   return {
-    username: decodeURIComponent(m[1]),
-    password: decodeURIComponent(m[2]),
-    host: decodeURIComponent(m[3]),
-    port: m[4] ? Number(m[4]) : 5432,
-    database: decodeURIComponent(m[5]),
+    username: decodeURIComponent(parsed.username),
+    password: decodeURIComponent(parsed.password),
+    host: parsed.hostname,
+    port: parsed.port ? Number(parsed.port) : 5432,
+    database: decodeURIComponent(parsed.pathname.replace(/^\//, "")),
   };
 }
 

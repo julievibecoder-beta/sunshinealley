@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { Save, RotateCcw, Plus, Trash2, Shield, MessageCircle, Users, Leaf, Star } from "lucide-react";
 import {
   useSiteContent,
@@ -24,9 +25,11 @@ const iconOptions: { value: TrustItem["icon"]; label: string; Icon: typeof Shiel
 ];
 
 function AdminHomeContent() {
+  const router = useRouter();
   const live = useSiteContent();
   const [draft, setDraft] = useState<SiteContent>(live);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Sync the draft whenever the live (server) content changes, so the form
   // shows the actual persisted values instead of just the initial cache.
@@ -41,8 +44,10 @@ function AdminHomeContent() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const save = async () => {
     setSaveError(null);
+    setSaving(true);
     try {
       await saveSiteContent(draft);
+      await router.invalidate({ sync: true });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (e: unknown) {
@@ -56,6 +61,8 @@ function AdminHomeContent() {
           ? "Not authorized — your admin session expired. Please log in again."
           : `Save failed — ${full}`,
       );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -111,10 +118,11 @@ function AdminHomeContent() {
           </button>
           <button
             onClick={save}
+            disabled={saving}
             className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary-foreground"
             style={{ background: "var(--primary)" }}
           >
-            <Save className="h-4 w-4" /> {saved ? "Saved!" : "Save changes"}
+            <Save className="h-4 w-4" /> {saving ? "Saving…" : saved ? "Saved!" : "Save changes"}
           </button>
         </div>
       </div>
