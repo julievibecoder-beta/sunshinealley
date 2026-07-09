@@ -37,7 +37,7 @@ function useCatalogue() {
   return useQuery({
     queryKey: CATALOGUE_KEY,
     queryFn: fetchCatalogue,
-    initialData: cache,
+    placeholderData: cache,
     staleTime: 30_000,
   });
 }

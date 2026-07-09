@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import {
@@ -27,13 +27,15 @@ import {
 export const Route = createFileRoute("/admin/about")({ component: AdminAbout });
 
 function AdminAbout() {
+  const router = useRouter();
   const live = useSiteContent();
   const [draft, setDraft] = useState<SiteContent>(live);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   useEffect(() => {
     setDraft(live);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [live]);
 
   const p = draft.aboutPage;
   const setP = (patch: Partial<AboutPage>) =>
@@ -75,24 +77,45 @@ function AdminAbout() {
       ],
     } as Partial<AboutPage>);
 
+  const onSave = async () => {
+    setSaveError(null);
+    setSaving(true);
+    try {
+      await saveSiteContent(draft);
+      await router.invalidate({ sync: true });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      const err = e as { message?: string; status?: number };
+      setSaveError(
+        err?.status === 401
+          ? "Not authorized — please log in again."
+          : `Save failed — ${err?.message ?? String(e)}`,
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-16">
       <PageHeader
         title="About page"
         subtitle="Edit the story, side image, founder card, reasons and values."
         saved={saved}
-        onSave={() => {
-          saveSiteContent(draft);
-          setSaved(true);
-          setTimeout(() => setSaved(false), 2000);
-        }}
+        saving={saving}
+        onSave={onSave}
         onReset={() => {
           if (confirm("Reset ALL site content to defaults?")) {
             resetSiteContent();
-            setDraft({ ...draft });
           }
         }}
       />
+      {saveError && (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {saveError}
+        </div>
+      )}
 
       <SeoSection value={p.seo} onChange={(seo) => setP({ seo })} />
 
