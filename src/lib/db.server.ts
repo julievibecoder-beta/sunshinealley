@@ -31,27 +31,50 @@ export function getSql() {
   return sql;
 }
 
+function maybeDecode(v: string) {
+  try {
+    return decodeURIComponent(v);
+  } catch {
+    return v;
+  }
+}
+
 function parseConnectionString(raw: string) {
   const normalized = raw.trim();
-  let parsed: URL;
-  try {
-    parsed = new URL(normalized);
-  } catch {
-    throw new Error("DATABASE_URL is not a valid postgres URL");
-  }
-
-  if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
+  const schemeMatch = /^(postgres(?:ql)?):\/\//i.exec(normalized);
+  if (!schemeMatch) {
     throw new Error("DATABASE_URL must start with postgres:// or postgresql://");
   }
+  // Manual parse: `new URL()` rejects passwords containing raw reserved
+  // characters such as $, # or ?, which Supabase passwords often include.
+  const rest = normalized.slice(schemeMatch[0].length);
+  const at = rest.lastIndexOf("@");
+  if (at === -1) throw new Error("DATABASE_URL is missing credentials");
+  const creds = rest.slice(0, at);
+  let hostPart = rest.slice(at + 1);
+
+  const colon = creds.indexOf(":");
+  const username = maybeDecode(colon === -1 ? creds : creds.slice(0, colon));
+  const password = colon === -1 ? "" : maybeDecode(creds.slice(colon + 1));
+
+  // Drop any query string / fragment from the host+db portion.
+  hostPart = hostPart.split(/[?#]/)[0] ?? hostPart;
+  const slash = hostPart.indexOf("/");
+  const hostAndPort = slash === -1 ? hostPart : hostPart.slice(0, slash);
+  const database = slash === -1 ? "postgres" : maybeDecode(hostPart.slice(slash + 1)) || "postgres";
+  const [host, portStr] = hostAndPort.split(":");
+
+  if (!host) throw new Error("DATABASE_URL is missing a host");
 
   return {
-    username: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 5432,
-    database: decodeURIComponent(parsed.pathname.replace(/^\//, "")),
+    username,
+    password,
+    host,
+    port: portStr ? Number(portStr) : 5432,
+    database,
   };
 }
+
 
 export async function ensureSchema() {
   if (!schemaReady) {
