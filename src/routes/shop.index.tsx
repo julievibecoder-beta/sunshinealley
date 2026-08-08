@@ -15,9 +15,9 @@ export const Route = createFileRoute("/shop/")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Shop — Kashmir Crafts" },
+      { title: "Shop — Sunshine Alley" },
       { name: "description", content: "Browse our collection of handcrafted Kashmiri carpets, Pashmina shawls, paper maché, and walnut wood pieces." },
-      { property: "og:title", content: "Shop — Kashmir Crafts" },
+      { property: "og:title", content: "Shop — Sunshine Alley" },
       { property: "og:description", content: "Authentic Kashmiri handicrafts curated from master artisans of the Valley." },
     ],
   }),

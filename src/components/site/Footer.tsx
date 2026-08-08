@@ -10,7 +10,7 @@ export function Footer() {
         <div className="md:col-span-1">
           <Link to="/" className="flex items-center gap-2">
             <ChinarLeaf className="h-6 w-6 text-primary" />
-            <span className="font-display text-xl font-semibold">Kashmir Crafts</span>
+            <span className="font-display text-xl font-semibold">Sunshine Alley</span>
           </Link>
           <p className="mt-3 text-sm text-muted-foreground">
             Authentic handicrafts from the Valley — woven, carved and painted by master artisans of Kashmir.
@@ -80,7 +80,7 @@ export function Footer() {
       </div>
       <div className="border-t">
         <div className="mx-auto max-w-7xl px-4 py-4 text-center text-xs text-muted-foreground md:px-6">
-          © {new Date().getFullYear()} Kashmir Crafts. Handmade with love in Srinagar.
+          © {new Date().getFullYear()} Sunshine Alley. Handmade with love in Srinagar.
         </div>
       </div>
     </footer>

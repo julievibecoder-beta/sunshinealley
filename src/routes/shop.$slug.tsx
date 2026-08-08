@@ -11,7 +11,7 @@ import { formatPrice, PHONE_TEL, PHONE_DISPLAY } from "@/lib/whatsapp";
 export const Route = createFileRoute("/shop/$slug")({
   head: () => ({
     meta: [
-      { title: "Product — Kashmir Crafts" },
+      { title: "Product — Sunshine Alley" },
       { name: "description", content: "Handcrafted Kashmiri piece — details, materials, and artisan story." },
     ],
   }),

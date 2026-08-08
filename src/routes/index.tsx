@@ -10,9 +10,9 @@ import type { TrustItem } from "@/lib/site-content";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Kashmir Crafts — Handcrafted in the Valley of Kashmir" },
+      { title: "Sunshine Alley — Handcrafted in the Valley of Kashmir" },
       { name: "description", content: "Authentic Kashmiri handicrafts — carpets, Pashmina, paper maché and walnut wood — direct from master artisans of the Valley." },
-      { property: "og:title", content: "Kashmir Crafts — Handcrafted in the Valley of Kashmir" },
+      { property: "og:title", content: "Sunshine Alley — Handcrafted in the Valley of Kashmir" },
       { property: "og:description", content: "Browse a curated collection of carpets, shawls, and paper maché crafted by Kashmir's master artisans." },
       { property: "og:image", content: "https://picsum.photos/seed/kashmir1/1600/900" },
     ],

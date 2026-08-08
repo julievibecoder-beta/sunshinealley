@@ -6,7 +6,7 @@ import { useAuth, useLogout } from "@/lib/admin-auth";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Kashmir Crafts" },
+      { title: "Admin — Sunshine Alley" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -54,7 +54,7 @@ function AdminLayout() {
       <header className="sticky top-0 z-30 border-b bg-background">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
           <Link to="/admin" className="font-display text-lg font-semibold">
-            Kashmir Crafts <span className="text-muted-foreground">/ Admin</span>
+            Sunshine Alley <span className="text-muted-foreground">/ Admin</span>
           </Link>
           <div className="flex items-center gap-2">
             <Link

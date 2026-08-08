@@ -33,7 +33,7 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2">
           <ChinarLeaf className="h-6 w-6 text-primary" />
-          <span className="font-display text-xl font-semibold tracking-tight">Kashmir Crafts</span>
+          <span className="font-display text-xl font-semibold tracking-tight">Sunshine Alley</span>
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
