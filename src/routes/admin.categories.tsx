@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Trash2, Pencil, X, Check } from "lucide-react";
+import { Plus, Trash2, Pencil, X, Check, Loader2 } from "lucide-react";
+import { BusyOverlay } from "@/components/admin/BusyOverlay";
 import {
   useCategories,
   saveCategories,
@@ -30,6 +31,7 @@ interface DraftState {
 function AdminCategories() {
   const categories = useCategories();
   const [editing, setEditing] = useState<DraftState | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
 
   const startNew = () =>
     setEditing({ id: "", originalName: "", name: "", subs: [] });
@@ -42,17 +44,24 @@ function AdminCategories() {
       subs: c.subcategories.map((s) => ({ original: s, name: s })),
     });
 
-  const remove = (id: string) => {
+  const remove = async (id: string) => {
     if (
       !confirm(
         "Delete this category? Products in it will keep the category name as plain text.",
       )
     )
       return;
-    saveCategories(categories.filter((c) => c.id !== id));
+    setBusy("Deleting category…");
+    try {
+      await saveCategories(categories.filter((c) => c.id !== id));
+    } catch (e) {
+      alert(`Delete failed — ${e instanceof Error ? e.message : "unknown error"}`);
+    } finally {
+      setBusy(null);
+    }
   };
 
-  const submit = (draft: DraftState) => {
+  const submit = async (draft: DraftState) => {
     const name = draft.name.trim();
     if (!name) return alert("Category name is required.");
     if (
@@ -102,8 +111,15 @@ function AdminCategories() {
       ? categories.map((c) => (c.id === draft.id ? cleaned : c))
       : [...categories, cleaned];
 
-    saveCategoriesWithCascade(next, categoryRenames, subRenames);
-    setEditing(null);
+    setBusy(draft.id ? "Saving category…" : "Adding category…");
+    try {
+      await saveCategoriesWithCascade(next, categoryRenames, subRenames);
+      setEditing(null);
+    } catch (e) {
+      alert(`Save failed — ${e instanceof Error ? e.message : "unknown error"}`);
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -118,7 +134,8 @@ function AdminCategories() {
         </div>
         <button
           onClick={startNew}
-          className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary-foreground"
+          disabled={busy !== null}
+          className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
           style={{ background: "var(--primary)" }}
         >
           <Plus className="h-4 w-4" /> New category
@@ -179,8 +196,11 @@ function AdminCategories() {
           onChange={setEditing}
           onCancel={() => setEditing(null)}
           onSubmit={submit}
+          busy={busy !== null}
         />
       )}
+
+      <BusyOverlay show={busy !== null} label={busy ?? "Saving…"} />
     </div>
   );
 }
@@ -190,11 +210,13 @@ function CategoryEditor({
   onChange,
   onCancel,
   onSubmit,
+  busy,
 }: {
   draft: DraftState;
   onChange: (d: DraftState) => void;
   onCancel: () => void;
   onSubmit: (d: DraftState) => void;
+  busy: boolean;
 }) {
   const [newSub, setNewSub] = useState("");
   const [editIdx, setEditIdx] = useState<number | null>(null);
@@ -254,7 +276,9 @@ function CategoryEditor({
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/60 p-4"
-      onClick={onCancel}
+      onClick={() => {
+        if (!busy) onCancel();
+      }}
     >
       <form
         onClick={(e) => e.stopPropagation()}
@@ -419,16 +443,19 @@ function CategoryEditor({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border px-4 py-2 text-sm hover:bg-muted"
+            disabled={busy}
+            className="rounded-md border px-4 py-2 text-sm hover:bg-muted disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-md px-4 py-2 text-sm font-medium text-primary-foreground"
+            disabled={busy}
+            className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
             style={{ background: "var(--primary)" }}
           >
-            {draft.id ? "Save changes" : "Create category"}
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            {busy ? "Saving…" : draft.id ? "Save changes" : "Create category"}
           </button>
         </div>
       </form>

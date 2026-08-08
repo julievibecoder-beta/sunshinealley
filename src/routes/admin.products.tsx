@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Star, X, ArrowUpDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, X, ArrowUpDown, Loader2 } from "lucide-react";
+import { BusyOverlay } from "@/components/admin/BusyOverlay";
 import {
   useProducts,
   useCategories,
@@ -42,6 +43,7 @@ function AdminProducts() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
   const [editing, setEditing] = useState<Draft | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -73,16 +75,31 @@ function AdminProducts() {
   const startNew = () => setEditing(emptyDraft(categories[0]?.name ?? ""));
   const startEdit = (p: Product) => setEditing({ ...p });
 
-  const remove = (id: string) => {
+  const run = async (label: string, fn: () => Promise<unknown>) => {
+    setBusy(label);
+    try {
+      await fn();
+      return true;
+    } catch (e) {
+      alert(`${label.replace("…", "")} failed — ${e instanceof Error ? e.message : "unknown error"}`);
+      return false;
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const remove = async (id: string) => {
     if (!confirm("Delete this product?")) return;
-    saveProducts(products.filter((p) => p.id !== id));
+    await run("Deleting product…", () => saveProducts(products.filter((p) => p.id !== id)));
   };
 
-  const togglePublish = (p: Product) => {
-    saveProducts(products.map((x) => (x.id === p.id ? { ...x, inStock: !x.inStock } : x)));
+  const togglePublish = async (p: Product) => {
+    await run("Updating product…", () =>
+      saveProducts(products.map((x) => (x.id === p.id ? { ...x, inStock: !x.inStock } : x))),
+    );
   };
 
-  const submit = (draft: Draft) => {
+  const submit = async (draft: Draft) => {
     if (!draft.name.trim()) return alert("Name is required.");
     const finalImages =
       draft.images.length > 0
@@ -93,7 +110,8 @@ function AdminProducts() {
       const next = products.map((p) =>
         p.id === draft.id ? { ...(draft as Product), images: finalImages, slug: p.slug } : p,
       );
-      saveProducts(next);
+      const ok = await run("Saving product…", () => saveProducts(next));
+      if (!ok) return;
     } else {
       const id = Date.now().toString();
       let slug = slugify(draft.name);
@@ -105,7 +123,8 @@ function AdminProducts() {
         slug,
         images: finalImages,
       };
-      saveProducts([next, ...products]);
+      const ok = await run("Adding product…", () => saveProducts([next, ...products]));
+      if (!ok) return;
     }
     setEditing(null);
   };
@@ -269,8 +288,11 @@ function AdminProducts() {
           onChange={setEditing}
           onCancel={() => setEditing(null)}
           onSubmit={submit}
+          busy={busy !== null}
         />
       )}
+
+      <BusyOverlay show={busy !== null} label={busy ?? "Saving…"} />
     </div>
   );
 }
@@ -280,11 +302,13 @@ function ProductEditor({
   onChange,
   onCancel,
   onSubmit,
+  busy,
 }: {
   draft: Draft;
   onChange: (d: Draft) => void;
   onCancel: () => void;
   onSubmit: (d: Draft) => void;
+  busy: boolean;
 }) {
   const categories = useCategories();
   const update = <K extends keyof Draft>(key: K, value: Draft[K]) =>
@@ -292,7 +316,12 @@ function ProductEditor({
   const activeCat = categories.find((c) => c.name === draft.category);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/60 p-4" onClick={onCancel}>
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/60 p-4"
+      onClick={() => {
+        if (!busy) onCancel();
+      }}
+    >
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
@@ -406,15 +435,22 @@ function ProductEditor({
         </div>
 
         <div className="mt-8 flex justify-end gap-2">
-          <button type="button" onClick={onCancel} className="rounded-md border px-4 py-2 text-sm hover:bg-muted">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={busy}
+            className="rounded-md border px-4 py-2 text-sm hover:bg-muted disabled:opacity-60"
+          >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-md px-4 py-2 text-sm font-medium text-primary-foreground"
+            disabled={busy}
+            className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
             style={{ background: "var(--primary)" }}
           >
-            {draft.id ? "Save changes" : "Create product"}
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            {busy ? "Saving…" : draft.id ? "Save changes" : "Create product"}
           </button>
         </div>
 
