@@ -24,6 +24,7 @@ export const getCatalogue = createServerFn({ method: "GET" }).handler(async () =
     const { categoriesSeed, products } = await import("@/data/products");
     return { categories: categoriesSeed as CategoryDef[], products: products as Product[] };
   }
+  try {
   await ensureSchema();
   const sql = getSql();
   const cats = await sql<
@@ -79,6 +80,11 @@ export const getCatalogue = createServerFn({ method: "GET" }).handler(async () =
   }));
 
   return { categories, products };
+  } catch (e) {
+    console.error("[catalogue] DB read failed, serving seed data:", e);
+    const { categoriesSeed, products } = await import("@/data/products");
+    return { categories: categoriesSeed as CategoryDef[], products: products as Product[] };
+  }
 });
 
 const CategoriesInput = z.array(
