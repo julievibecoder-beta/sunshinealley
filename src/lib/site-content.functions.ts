@@ -5,12 +5,18 @@ import { defaultSiteContent, mergeSiteContent, type SiteContent } from "./site-c
 export const getSiteContentFn = createServerFn({ method: "GET" }).handler(async (): Promise<SiteContent> => {
   const { getSql, ensureSchema, hasDatabaseUrl } = await import("./db.server");
   if (!hasDatabaseUrl()) return defaultSiteContent;
-  await ensureSchema();
-  const sql = getSql();
-  const rows = await sql<{ data: Partial<SiteContent> }[]>`SELECT data FROM site_content WHERE id = 'main' LIMIT 1`;
-  if (!rows[0]) return defaultSiteContent;
-  return mergeSiteContent(rows[0].data);
+  try {
+    await ensureSchema();
+    const sql = getSql();
+    const rows = await sql<{ data: Partial<SiteContent> }[]>`SELECT data FROM site_content WHERE id = 'main' LIMIT 1`;
+    if (!rows[0]) return defaultSiteContent;
+    return mergeSiteContent(rows[0].data);
+  } catch (e) {
+    console.error("[site-content] DB read failed, serving defaults:", e);
+    return defaultSiteContent;
+  }
 });
+
 
 export const saveSiteContentFn = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ content: z.any() }).parse(d))
