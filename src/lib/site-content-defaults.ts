@@ -226,9 +226,18 @@ export const defaultSiteContent: SiteContent = {
 
 export function mergeSiteContent(parsed: Partial<SiteContent> | null | undefined): SiteContent {
   if (!parsed) return defaultSiteContent;
+  const storedHero = parsed.hero ?? defaultSiteContent.hero;
   return {
     ...defaultSiteContent,
     ...parsed,
+    hero: {
+      ...defaultSiteContent.hero,
+      ...storedHero,
+      // Legacy placeholder hero images fall back to the current default image.
+      image: /picsum\.photos/.test(storedHero.image ?? "")
+        ? defaultSiteContent.hero.image
+        : storedHero.image || defaultSiteContent.hero.image,
+    },
     heritagePage: {
       ...defaultSiteContent.heritagePage,
       ...(parsed.heritagePage ?? {}),
