@@ -86,7 +86,7 @@ export type SiteContent = {
 
 export const defaultSiteContent: SiteContent = {
   hero: {
-    image: "https://picsum.photos/seed/kashmir1/1600/900",
+    image: "/__l5e/assets-v1/2e5def21-ccbf-437e-8fc9-94f2bc438386/kashmir-hero.png",
     eyebrow: "Handcrafted in the Valley of Kashmir",
     titleLine1: "Woven in Kashmir,",
     titleLine2: "Cherished Worldwide",
