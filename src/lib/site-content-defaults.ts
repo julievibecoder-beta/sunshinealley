@@ -200,7 +200,7 @@ export const defaultSiteContent: SiteContent = {
       whatsappLabel: "WhatsApp",
       whatsappLink: "Chat with us on WhatsApp",
       emailLabel: "Email",
-      email: "hello@kashmircrafts.example",
+      email: "hello@sunshinealley.com",
       addressLabel: "Address",
       address: "Lal Chowk, Srinagar, Kashmir 190001, India",
       hoursLabel: "Shop Hours",
