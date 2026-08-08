@@ -1,7 +1,7 @@
 export const WHATSAPP_NUMBER = "919876543210";
 export const PHONE_DISPLAY = "+91 98765 43210";
 export const PHONE_TEL = "+919876543210";
-export const EMAIL = "info@kashmircrafts.com";
+export const EMAIL = "info@sunshinealley.com";
 export const ADDRESS = "Lal Chowk, Srinagar, Kashmir — 190001";
 
 export function getWhatsAppLink(productName?: string, customMessage?: string) {

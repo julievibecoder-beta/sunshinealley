@@ -156,20 +156,20 @@ export const defaultSiteContent: SiteContent = {
   },
   aboutPage: {
     seo: {
-      title: "About — Kashmir Crafts",
-      description: "Kashmir Crafts connects the world with authentic handicrafts of the Kashmir Valley — directly from master artisans.",
+      title: "About — Sunshine Alley",
+      description: "Sunshine Alley connects the world with authentic handicrafts of the Kashmir Valley — directly from master artisans.",
       ogImage: "https://picsum.photos/seed/kashmir-shop/1200/630",
     },
     story: {
       eyebrow: "Our Story",
       title: "A shop with the Valley in its bones",
       body1:
-        "Kashmir Crafts was founded in 1998 with a single mission: to connect the world with the authentic handicrafts of the Kashmir Valley. What began as a small shop in Lal Chowk, Srinagar has grown into a trusted name for collectors, interior designers, and craft lovers across India and abroad.",
+        "Sunshine Alley was founded in 1998 with a single mission: to connect the world with the authentic handicrafts of the Kashmir Valley. What began as a small shop in Lal Chowk, Srinagar has grown into a trusted name for collectors, interior designers, and craft lovers across India and abroad.",
       body2:
         "We work with over forty artisan families across the Valley — many of whom have been part of our story for two decades. Every piece you buy here funds the next.",
       sideImage: "https://picsum.photos/seed/kashmir-shop/800/900",
       founderName: "Imtiyaz Ahmad",
-      founderTitle: "Founder · Kashmir Crafts",
+      founderTitle: "Founder · Sunshine Alley",
       founderImage: "https://picsum.photos/seed/owner-portrait/300/300",
     },
     reasonsSection: { title: "Why buy from us" },
@@ -188,8 +188,8 @@ export const defaultSiteContent: SiteContent = {
   },
   contactPage: {
     seo: {
-      title: "Contact — Kashmir Crafts",
-      description: "Get in touch with Kashmir Crafts. WhatsApp, phone, email, or visit our shop in Lal Chowk, Srinagar.",
+      title: "Contact — Sunshine Alley",
+      description: "Get in touch with Sunshine Alley. WhatsApp, phone, email, or visit our shop in Lal Chowk, Srinagar.",
       ogImage: "",
     },
     header: { title: "Get in Touch", subtitle: "We'd love to hear from you. Most customers reach us on WhatsApp." },
@@ -200,7 +200,7 @@ export const defaultSiteContent: SiteContent = {
       whatsappLabel: "WhatsApp",
       whatsappLink: "Chat with us on WhatsApp",
       emailLabel: "Email",
-      email: "hello@kashmircrafts.example",
+      email: "hello@sunshinealley.com",
       addressLabel: "Address",
       address: "Lal Chowk, Srinagar, Kashmir 190001, India",
       hoursLabel: "Shop Hours",
